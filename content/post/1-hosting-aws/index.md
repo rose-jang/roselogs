@@ -2,6 +2,8 @@
 title: Host a Web Application on AWS
 date: 2025-02-02
 draft: false
+image: cloud-banner.png
+description: Walk through a simple way to host a web app on AWS.
 tags:
   - "AWS"
   - "Automation"
@@ -15,11 +17,11 @@ This project demonstrates how to deploy a web application on a Linux-based AWS E
 	1. AWS account (preferably **IAM admin user**)
 	2. Simple HTML code for static website
 
-## Create AWS EC2 instance
+# Create AWS EC2 instance
 
 Since this project has modest resource requirements, I have selected a minimum-level instance. Despite its low resource allocation, this instance is more than capable of efficiently serving the web application. Default settings are applied during the instance initialization process.
 
-### Basic components
+## Basic components
 - AMI: `Amazon Linux` - maximize efficiency, minimize power resources
 - Type: `t2.micro` - free tier, perfect for small project
 - Firewall (security group): Create with the default settings
@@ -27,8 +29,8 @@ Since this project has modest resource requirements, I have selected a minimum-l
 Instance summary:
 ![Instance summary](instance_summary.png)
 
-### Additional configuration
-####  Firewall: Configure a `security group` for public access
+## Additional configuration
+###  Firewall: Configure a `security group` for public access
 - Add an inbound rule to allow traffic from public users
 - Ensure the `HTTP/HTTPS` protocols are enabled, as they are essential for initiating and maintaining web services *(HTTP is used to support this non-production project)*
 
@@ -38,7 +40,7 @@ Instance summary:
 - Port: **80** port number designated for HTTP
 - Source: **0.0.0.0/0** indicates `any` IP addresses (all range)
 
-### Writing a User Data
+## Writing a User Data
 User data is a powerful feature in AWS allows to automate tasks during the initialization of an EC2 instance. By providing a shell script in the User Data field, we can:
 - Automate repetitive setup tasks, reducing manual intervention.
 - Configure and prepare the instance during its boot process, saving time.
@@ -108,7 +110,7 @@ EOF
 ```
 
 
-## Run the instance & Web server
+# Run the instance & Web server
 
 Using the user data script, we pre-configured everything necessary for the web server: 
 - Installed and configured the web server
@@ -117,10 +119,10 @@ Using the user data script, we pre-configured everything necessary for the web s
 
 Now it's time to test the web server by launching the instance and verifying that it is running successfully.
 
-#### 1. Launching the Instance
+## Launching the Instance
 Double-check the instance settings and the shell script correctly saved in user data. Also ensure that the Security Group has an inbound rule allowing `http` traffic (port 80) to enable public access to the web server.
 
-#### 2. Locate the Instance Details
+## Locate the Instance Details
 Once the instance is running, navigate to the `Details` section to check its status and availability zone. This will be used to verify if the metadata is correctly passed in the script. Locate the **public IP address** to access the web server. Ensure the instance is in a "Running" state and that all health checks have passed before proceeding.
 
 Instance details
@@ -129,15 +131,16 @@ Instance details
 - Public IP address: **54.91.44.217**
 
 ![Instance Available Zone](instance_AZ.png)
+
 ![Instance IP address](instance_IP.png)
 
-#### 3. Test the Web Server
+## Test the Web Server
 Access the public IP address in a web browser using `http` protocol. 
 `(ex. http://54.91.44.217)`
 Confirm that the Nginx web server is running and the landing page matches the content of the `index.html` file.
 
 ![Web app result](webapp.png)
-##### *TIP!*
+### *TIP!*
 If the web server is not running or there are any issues, check the log file for details.
 The log file provides detailed information about the execution of the user data script and helps troubleshoot any errors or misconfigurations.
 ```
@@ -145,6 +148,6 @@ cat /var/log/cloud-init-outpug.log
 ```
 
 
-## Conclusion
+# Conclusion
 
 This project successfully demonstrated how to deploy a web application on an AWS EC2 instance using Nginx. Utilizing `User data` reduces time on initializing core configurations including web server installation, setup, and deployment of a static landing page. This streamlined approach highlights the efficiency and flexibility of cloud infrastructure for hosting a web application.
