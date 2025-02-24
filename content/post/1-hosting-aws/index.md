@@ -5,10 +5,11 @@ draft: false
 image: cloud-banner.png
 description: Walk through a simple way to host a web app on AWS.
 tags:
-  - "AWS"
-  - "Automation"
-  - "Nginx"
-categories: Cloud
+  - AWS
+  - Automation
+  - Nginx
+categories: 
+  - Cloud
 ---
 
 This project demonstrates how to deploy a web application on a Linux-based AWS EC2 instance. While there are several ways to publish a web application, it focuses on using `User data` to automate the setup. By leveraging user data, we can streamline the configuration process, allowing the instance to perform initial setup tasks automatically during boot.
@@ -50,8 +51,8 @@ Below is the shell script that automates the tasks required to run a web server.
 
 ```bash
 # Part 1. System Update & Installation
-# The first part ensures the Linux system is up to date and installs the web server (Nginx).
-# After installation, the script starts and enables the Nginx service to ensure it runs autsomatically.
+# Ensure the system is up to date and installs web server (Nginx).
+# After updates, start and enable the Nginx service.
 
 #!/bin/bash
 
@@ -70,17 +71,15 @@ systemctl enable nginx
 chkconfig nginx on
 
 # Part 2. Retrieving AWS Metadata
-# To demonstrate that the web server is running on our EC2 instance, this part retrieves AWS instance metadata.
-# The script extracts the `availability zone` and saves it as a variable.
-# This data will be displayed on the web page, providing information about the instance's location.
+# Retrieves AWS instance metadata for live demonstration.
+# Extract and save instance's `availability zone` as a variable- AZ.
 
 # Retrieve metadata of the instance
 TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
 AZ=`curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/availability-zone`
 
 # Part 3. Create a Web Page File
-# The final part creates an `index.html` file, the default home page for the web server.
-# This file will be saved in the Nginx configuration directory and serves as a landing page for the running web server.
+# Create an `index.html` file as a default landing page.
 
 # Create a web page file in .html
 cat > /usr/share/nginx/html/index.html <<EOF
@@ -108,6 +107,7 @@ cat > /usr/share/nginx/html/index.html <<EOF
 </html>
 EOF
 ```
+
 
 
 # Run the instance & Web server

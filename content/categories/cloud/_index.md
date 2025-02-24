@@ -1,6 +1,6 @@
 ---
-title: Example Category
-description: A description of this category
+title: Cloud
+description: A collection of projects on cloud
 image: cloud-icon.png
 
 # Badge style
