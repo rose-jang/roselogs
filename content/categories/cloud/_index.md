@@ -1,10 +1,10 @@
 ---
 title: Cloud
-description: A collection of projects on cloud
-image: cloud-icon.png
+description: A collection of ideas on cloud
+image: cloud.png
 
 # Badge style
 style:
-    background: "#2a9d8f"
+    background: "#9fc5e8"
     color: "#fff"
 ---
