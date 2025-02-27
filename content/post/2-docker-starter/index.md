@@ -2,6 +2,7 @@
 title: Docker Starter
 date: 2025-02-26
 draft: false
+image: docker-banner.png
 tags:
   - Docker
   - Containerization
