@@ -1,10 +1,10 @@
 ---
-title: Docker Starter
+title: Try Dockerfile
 date: 2025-02-26
-draft: false
+draft: true
 image: docker-banner.png
 tags:
-  - Docker
+  - Kubernetes
   - Containerization
   - Virtualization
 categories: 
