@@ -1,6 +1,6 @@
 ---
 title: Kubernetes Basics
-date: 2025-02-26
+date: 2025-03-27
 draft: false
 image: k8s-banner.png
 tags:
