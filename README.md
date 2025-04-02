@@ -17,5 +17,4 @@ This repository serves as my personal space to document and share my journey thr
   - Containerization (Docker, Kubernetes)  
   - Infrastructure as Code (Terraform)
 
-- **Check out my blog! 👉 [RoseLogs](rose-jang.github.io/roselogs/)**
-
+- **Check out my blog! 👉 [RoseLogs](https://rose-jang.github.io/roselogs/)**
