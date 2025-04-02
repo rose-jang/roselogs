@@ -1,7 +1,7 @@
 
 # RoseLogs
 
-**Welcome to my IT Learning Journal!**
+**Welcome to my IT Learning Journal**
 This repository serves as my personal space to document and share my journey through IT and DevOps. Here, I explore various technologies including cloud computing, containerization, and Infrastructure as Code, while working on hands-on projects to deepen my understanding.
 
 ## About This Journal
@@ -15,8 +15,7 @@ This repository serves as my personal space to document and share my journey thr
 - **Topics Covered:**  
   - Cloud Computing (AWS focused)  
   - Containerization (Docker, Kubernetes)  
-  - Infrastructure as Code (Terraform)  
-  - CI/CD and Automation
+  - Infrastructure as Code (Terraform)
 
-
+- **Check out my blog! 👉 [RoseLogs](rose-jang.github.io/roselogs/)**
 
