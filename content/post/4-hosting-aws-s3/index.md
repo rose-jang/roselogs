@@ -2,7 +2,7 @@
 title: Web App hosting on AWS S3
 date: 2025-04-04
 draft: false
-image: k8s-banner.png
+image: cloud-banner.png
 tags:
   - Cloud
   - AWS
@@ -99,3 +99,8 @@ Now that the website is hosted on S3, we can set up a custom domain using **AWS 
 	- Once the DNS record is created, try accessing the domain
     - If everything is configured correctly, the website should be up and running without issues
 ![Website accessibility](web-hosting.png)
+
+
+## Final Thoughts
+
+By following these steps, we can host a simple static web app using AWS S3 and Route 53. This setup ensures that the website is scalable and easily accessible through a custom domain name. Furthermore, by using AWS services like S3 and Route 53, the application benefits from high availability and low latency, providing a better user experience for visitors.
