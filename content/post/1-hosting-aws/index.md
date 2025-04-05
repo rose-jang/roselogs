@@ -28,7 +28,7 @@ Since this project has modest resource requirements, I have selected a minimum-l
 - Firewall (security group): Create with the default settings
 
 Instance summary:
-![Instance summary](instance_summary.png)
+![Instance summary](./img/instance_summary.png)
 
 ## Additional configuration
 ###  Firewall: Configure a `security group` for public access
@@ -130,16 +130,16 @@ Instance details
 - Availability Zone: **us-east-1c**
 - Public IP address: **54.91.44.217**
 
-![Instance Available Zone](instance_AZ.png)
+![Instance Available Zone](./img/instance_AZ.png)
 
-![Instance IP address](instance_IP.png)
+![Instance IP address](./img/instance_IP.png)
 
 ## Test the Web Server
 Access the public IP address in a web browser using `http` protocol. 
 `(ex. http://54.91.44.217)`
 Confirm that the Nginx web server is running and the landing page matches the content of the `index.html` file.
 
-![Web app result](webapp.png)
+![Web app result](./img/webapp.png)
 ### *TIP!*
 If the web server is not running or there are any issues, check the log file for details.
 The log file provides detailed information about the execution of the user data script and helps troubleshoot any errors or misconfigurations.
