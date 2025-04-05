@@ -2,7 +2,7 @@
 title: Docker Basics
 date: 2025-02-26
 draft: false
-image: ./img/docker-banner.png
+image: docker-banner.png
 tags:
   - Docker
   - Containerization

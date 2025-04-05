@@ -16,3 +16,7 @@ disqusShortname = "roselogs"
 
 [pagination]
 pagerSize = 5
+
+params:
+    comments:
+        enabled: false

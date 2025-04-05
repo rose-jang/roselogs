@@ -2,7 +2,7 @@
 title: Web App hosting on AWS S3
 date: 2025-04-04
 draft: false
-image: ./img/cloud-banner.png
+image: cloud-banner.png
 tags:
   - Cloud
   - AWS
@@ -41,17 +41,17 @@ Amazon **S3 (Simple Storage Service)** is a highly scalable object storage servi
 	- Create a general bucket with a globally unique name
 	- Leave other settings as default
 
-![Create a bucket](./img/create_bucket.png)
+![Create a bucket](create_bucket.png)
 
 2. Upload files
 	- After the bucket is created, simply drag & drop files into the bucket
 
-![Upload object](./img/upload_objects.png)
+![Upload object](upload_objects.png)
 
 ### Configuration
 After uploading the website files, we need to configure the bucket for static website hosting.
 
-![Bucket configuration](./img/bucket_configure.png)
+![Bucket configuration](bucket_configure.png)
 
 1. **Properties**
 - Enable **Static website hosting**
@@ -59,7 +59,7 @@ After uploading the website files, we need to configure the bucket for static we
 	- Index document: **index.html** (landing page)
 	- Keep other settings as default
 
-![Bucket Properties](./img/bucket_static.png)
+![Bucket Properties](bucket_static.png)
 
 2. **Permissions**
 - Turn off **Block all public access**, which will allow the bucket to be publicly accessible
@@ -83,7 +83,7 @@ After uploading the website files, we need to configure the bucket for static we
 - In **Properties**, scroll down to the **Bucket website endpoint**
 - The endpoint displays the bucket objects as a static website
 
-![Bucket endpoint](./img/bucket_endpoint.png)
+![Bucket endpoint](bucket_endpoint.png)
 
 ---
 ## Domain name setup with **Route 53**
@@ -93,20 +93,20 @@ Now that the website is hosted on S3, we can set up a custom domain using **AWS 
 1. Access to **Route 53**, and select your domain
 2. Under **Records**, click **Create record**
 
-![Create a new record](./img/create_53.png)
+![Create a new record](create_53.png)
 
 3. Configure the **CNAME** record (subdomain)
 	- Record name: **Name the website** as you want
 	- Record type: **CNAME** (Canonical Name)
 	- Value: Enter the **website endpoint** retrieved from the bucket
 
-![CNAME Record](./img/53_endpoint.png)
+![CNAME Record](53_endpoint.png)
 
 4. **Check Accessibility**
 	- Once the DNS record is created, try accessing the domain
     - If everything is configured correctly, the website should be up and running without issues
 
-![Website accessibility](./img/web-hosting.png)
+![Website accessibility](web-hosting.png)
 
 
 ---
@@ -120,7 +120,7 @@ To further enhance the speed, security, and global accessibility of the website,
 	- Choose the **S3 bucket** (static website endpoint) as the origin domain
 	- Ensure the **bucket name** and **custom domain name** match for routing
 
-![CF Distribution](./img/cf_create.png)
+![CF Distribution](cf_create.png)
 
 2. Distribution configuration
 	- Configure further for proper access
@@ -128,29 +128,29 @@ To further enhance the speed, security, and global accessibility of the website,
 	- Price class: Select desired **regions**
 	- Alternate domain name: Add the **domain name** configured previously
 
-![CF Configuration](./img/cf_configure.png)
+![CF Configuration](cf_configure.png)
 
 3. Request a certificate
 	- If you don't have one yet, request a new public certificate
 	- Fully qualified domain name: Enter the **FQDN**
 	- Validation method: **DNS validation**
 
-![Request certificate](./img/cf_cert1.png)
-![Certificate](./img/cf_cert2.png)
+![Request certificate](cf_cert1.png)
+![Certificate](cf_cert2.png)
 
 	- Confirm the certificate status and return to the distribution setup
 	- Select the new certificate from the list
 	- Complete the distribution creation process
 
-![Certificate status](./img/cert_status.png)
-![Select certificate](./img/cert_select.png)
+![Certificate status](cert_status.png)
+![Select certificate](cert_select.png)
 
 4. Edit Route 53 CNAME record
 Once the distrubution is deployed and enabled:
 	- Go to **Route 53** and edit the existing **CNAME** record
 	- Replace the value with the distribution domain name
 
-![CNAME change](./img/cname_change.png)
+![CNAME change](cname_change.png)
 
 5. Verify Website Accessibility
 If everything is configured correctly and running, you can now access the secure website.
@@ -159,7 +159,7 @@ The website is now:
 	- Securely accessible with **HTTPS** via the ACM-issued cerficicate
 	- Properly routed through the custom domain name
 
-![Final website](./img/final.png)
+![Final website](final.png)
 
 
 ---
