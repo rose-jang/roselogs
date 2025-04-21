@@ -2,6 +2,7 @@
 title: Docker Basics
 date: 2025-02-26
 draft: false
+disqus: false
 image: docker-banner.png
 tags:
   - Docker

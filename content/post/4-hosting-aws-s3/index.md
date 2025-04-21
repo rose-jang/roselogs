@@ -2,6 +2,7 @@
 title: Web App hosting on AWS S3
 date: 2025-04-04
 draft: false
+disqus: false
 image: cloud-banner.png
 tags:
   - Cloud

@@ -2,8 +2,9 @@
 title: Host a Web Application on AWS
 date: 2025-02-02
 draft: false
+disqus: false
 image: cloud-banner.png
-description: Walk through a simple way to host a web app on AWS.
+# description: Walk through a simple way to host a web app on AWS.
 tags:
   - AWS
   - Automation
@@ -144,7 +145,7 @@ Confirm that the Nginx web server is running and the landing page matches the co
 If the web server is not running or there are any issues, check the log file for details.
 The log file provides detailed information about the execution of the user data script and helps troubleshoot any errors or misconfigurations.
 ```
-cat /var/log/cloud-init-outpug.log
+cat /var/log/cloud-init-output.log
 ```
 
 
