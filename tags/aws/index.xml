@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>AWS on Rose Jang</title><link>https://rose-jang.github.io/roselogs/tags/aws/</link><description>Recent content in AWS on Rose Jang</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 04 Apr 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://rose-jang.github.io/roselogs/tags/aws/index.xml" rel="self" type="application/rss+xml"/><item><title>Web App hosting on AWS S3</title><link>https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/</link><pubDate>Fri, 04 Apr 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cloud-banner.png" alt="Featured image of post Web App hosting on AWS S3" />&lt;h1 id="project-overview">Project Overview
+&lt;/h1>&lt;p>In this project, I built a simple &lt;strong>note-taking web app&lt;/strong> that features a clean and minimalistic design, providing a user-friendly interface for taking quick notes. To make the app accessible to users on the web, I hosted it using AWS (Amazon Web Services), specifically using &lt;strong>Amazon S3 for static website hosting&lt;/strong> and &lt;strong>Route 53 for domain management&lt;/strong>. By deploying the app on AWS, we can ensure that it is scalable, secure, and easily accessible.&lt;/p>
+&lt;ul>
+&lt;li>&lt;em>Prerequisites&lt;/em>
+&lt;ol>
+&lt;li>AWS account (preferably &lt;strong>IAM admin user&lt;/strong>)&lt;/li>
+&lt;li>Static website files&lt;/li>
+&lt;li>Domain name&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="used-aws-services">Used AWS Services
+&lt;/h1>&lt;p>To maximize the functionality of the web application, several AWS services were utilized in this project. These services enhance security, availability, and user accessibility on the front end while ensuring efficient management and cost-effectiveness on the back end.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>S3&lt;/strong> (Simple Storage Service)&lt;/li>
+&lt;li>&lt;strong>Route 53&lt;/strong> (for Domain Name Service)&lt;/li>
+&lt;li>&lt;strong>CloudFront&lt;/strong> (as Content Network Delivery)&lt;/li>
+&lt;li>&lt;strong>AWS Certificate Manager&lt;/strong> (to activate HTTPS)&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="content-management-on-s3">Content management on &lt;strong>S3&lt;/strong>
+&lt;/h2>&lt;p>Amazon &lt;strong>S3 (Simple Storage Service)&lt;/strong> is a highly scalable object storage service that allows us to store and manage virtually unlimited amounts of data. It is particularly useful for hosting static websites, including HTML, CSS, JS, images, and other files.&lt;/p>
+&lt;h3 id="setting-up-bucket">Setting Up Bucket
+&lt;/h3>&lt;ol>
+&lt;li>Create a bucket
+&lt;ul>
+&lt;li>Create a general bucket with a globally unique name&lt;/li>
+&lt;li>Leave other settings as default&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_bucket.png"
+width="1792"
+height="950"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_bucket_hu_286e39940665f80e.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_bucket_hu_1e7c615005382025.png 1024w"
+loading="lazy"
+alt="Create a bucket"
+class="gallery-image"
+data-flex-grow="188"
+data-flex-basis="452px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>Upload files
+&lt;ul>
+&lt;li>After the bucket is created, simply drag &amp;amp; drop files into the bucket&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/upload_objects.png"
+width="2838"
+height="964"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/upload_objects_hu_87b0a75a3b92d804.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/upload_objects_hu_59ba7c5e793050cc.png 1024w"
+loading="lazy"
+alt="Upload object"
+class="gallery-image"
+data-flex-grow="294"
+data-flex-basis="706px"
+>&lt;/p>
+&lt;h3 id="configuration">Configuration
+&lt;/h3>&lt;p>After uploading the website files, we need to configure the bucket for static website hosting.&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_configure.png"
+width="1602"
+height="1196"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_configure_hu_3d3335b099782e36.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_configure_hu_999c205d90fb5b0.png 1024w"
+loading="lazy"
+alt="Bucket configuration"
+class="gallery-image"
+data-flex-grow="133"
+data-flex-basis="321px"
+>&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>Properties&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Enable &lt;strong>Static website hosting&lt;/strong>
+&lt;ul>
+&lt;li>Hosting type: &lt;strong>Static website&lt;/strong>&lt;/li>
+&lt;li>Index document: &lt;strong>index.html&lt;/strong> (landing page)&lt;/li>
+&lt;li>Keep other settings as default&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_static.png"
+width="2728"
+height="1310"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_static_hu_da274f274475bdfd.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_static_hu_d113b63afc9c5d53.png 1024w"
+loading="lazy"
+alt="Bucket Properties"
+class="gallery-image"
+data-flex-grow="208"
+data-flex-basis="499px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>&lt;strong>Permissions&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Turn off &lt;strong>Block all public access&lt;/strong>, which will allow the bucket to be publicly accessible&lt;/li>
+&lt;li>Edit &lt;strong>Bucket policy&lt;/strong> as below, in &lt;strong>JSON&lt;/strong> format (&lt;em>Use your bucket ARN as &lt;strong>Resource&lt;/strong>&lt;/em>)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-json" data-lang="json">&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Version&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;2012-10-17&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Statement&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Sid&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;PublicReadGetObject&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Effect&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;Allow&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Principal&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;*&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Action&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;s3:GetObject&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Resource&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;arn:aws:s3:::note.rosespace.me/*&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="3">
+&lt;li>Verify &lt;strong>Accessibility&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>In &lt;strong>Properties&lt;/strong>, scroll down to the &lt;strong>Bucket website endpoint&lt;/strong>&lt;/li>
+&lt;li>The endpoint displays the bucket objects as a static website&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_endpoint.png"
+width="1666"
+height="602"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_endpoint_hu_15d362ce8292f10a.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_endpoint_hu_7f3f4ee0a136ddd4.png 1024w"
+loading="lazy"
+alt="Bucket endpoint"
+class="gallery-image"
+data-flex-grow="276"
+data-flex-basis="664px"
+>&lt;/p>
+&lt;hr>
+&lt;h2 id="domain-name-setup-with-route-53">Domain name setup with &lt;strong>Route 53&lt;/strong>
+&lt;/h2>&lt;p>Now that the website is hosted on S3, we can set up a custom domain using &lt;strong>AWS Route 53&lt;/strong> to make the site more user-friendly and accessible.&lt;/p>
+&lt;h3 id="create-a-dns-record">Create a DNS Record
+&lt;/h3>&lt;ol>
+&lt;li>Access to &lt;strong>Route 53&lt;/strong>, and select your domain&lt;/li>
+&lt;li>Under &lt;strong>Records&lt;/strong>, click &lt;strong>Create record&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_53.png"
+width="2089"
+height="1334"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_53_hu_3c21253ce549fdc.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_53_hu_1d730f5b416de6e8.png 1024w"
+loading="lazy"
+alt="Create a new record"
+class="gallery-image"
+data-flex-grow="156"
+data-flex-basis="375px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>Configure the &lt;strong>CNAME&lt;/strong> record (subdomain)
+&lt;ul>
+&lt;li>Record name: &lt;strong>Name the website&lt;/strong> as you want&lt;/li>
+&lt;li>Record type: &lt;strong>CNAME&lt;/strong> (Canonical Name)&lt;/li>
+&lt;li>Value: Enter the &lt;strong>website endpoint&lt;/strong> retrieved from the bucket&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/53_endpoint.png"
+width="2704"
+height="932"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/53_endpoint_hu_51e777dac03e4205.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/53_endpoint_hu_721d83b2e228ac43.png 1024w"
+loading="lazy"
+alt="CNAME Record"
+class="gallery-image"
+data-flex-grow="290"
+data-flex-basis="696px"
+>&lt;/p>
+&lt;ol start="4">
+&lt;li>&lt;strong>Check Accessibility&lt;/strong>
+&lt;ul>
+&lt;li>Once the DNS record is created, try accessing the domain&lt;/li>
+&lt;li>If everything is configured correctly, the website should be up and running without issues&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/web-hosting.png"
+width="1314"
+height="972"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/web-hosting_hu_d75b240a79a00dc1.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/web-hosting_hu_7ff2ddcb21366ecd.png 1024w"
+loading="lazy"
+alt="Website accessibility"
+class="gallery-image"
+data-flex-grow="135"
+data-flex-basis="324px"
+>&lt;/p>
+&lt;hr>
+&lt;h2 id="cloutfront">&lt;strong>CloutFront&lt;/strong>
+&lt;/h2>&lt;p>To further enhance the speed, security, and global accessibility of the website, let&amp;rsquo;s deploy a &lt;strong>CloudFront&lt;/strong> distribution and issue a a public SSL/TLS certifiacate via &lt;strong>ACM, AWS Certificate Manager&lt;/strong>.&lt;/p>
+&lt;h3 id="initialize-cloudfront-distribution">Initialize CloudFront Distribution
+&lt;/h3>&lt;ol>
+&lt;li>Create a distribution
+&lt;ul>
+&lt;li>Navigate to &lt;strong>CloudFront&lt;/strong> and create a new &lt;strong>distribution&lt;/strong>&lt;/li>
+&lt;li>Choose the &lt;strong>S3 bucket&lt;/strong> (static website endpoint) as the origin domain&lt;/li>
+&lt;li>Ensure the &lt;strong>bucket name&lt;/strong> and &lt;strong>custom domain name&lt;/strong> match for routing&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_create.png"
+width="1538"
+height="1020"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_create_hu_1b11f7a28e2dc5f2.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_create_hu_3f90682a040f2037.png 1024w"
+loading="lazy"
+alt="CF Distribution"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="361px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>Distribution configuration
+&lt;ul>
+&lt;li>Configure further for proper access&lt;/li>
+&lt;li>Viewer: Redirect &lt;strong>HTTP to HTTPS&lt;/strong>&lt;/li>
+&lt;li>Price class: Select desired &lt;strong>regions&lt;/strong>&lt;/li>
+&lt;li>Alternate domain name: Add the &lt;strong>domain name&lt;/strong> configured previously&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_configure.png"
+width="1706"
+height="372"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_configure_hu_96bd225d11949fe3.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_configure_hu_b7b027e326ad0e3c.png 1024w"
+loading="lazy"
+alt="CF Configuration"
+class="gallery-image"
+data-flex-grow="458"
+data-flex-basis="1100px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>Request a certificate
+&lt;ul>
+&lt;li>If you don&amp;rsquo;t have one yet, request a new public certificate&lt;/li>
+&lt;li>Fully qualified domain name: Enter the &lt;strong>FQDN&lt;/strong>&lt;/li>
+&lt;li>Validation method: &lt;strong>DNS validation&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert1.png"
+width="1216"
+height="324"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert1_hu_cef6f1e4e6ed3b7f.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert1_hu_d6a216b0b10e45f0.png 1024w"
+loading="lazy"
+alt="Request certificate"
+class="gallery-image"
+data-flex-grow="375"
+data-flex-basis="900px"
+>
+&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert2.png"
+width="1150"
+height="918"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert2_hu_5f69615b5fe6710.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert2_hu_2f5c0242295524a1.png 1024w"
+loading="lazy"
+alt="Certificate"
+class="gallery-image"
+data-flex-grow="125"
+data-flex-basis="300px"
+>&lt;/p>
+&lt;pre>&lt;code>- Confirm the certificate status and return to the distribution setup
+- Select the new certificate from the list
+- Complete the distribution creation process
+&lt;/code>&lt;/pre>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_status.png"
+width="1028"
+height="716"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_status_hu_b1b3c487847a6942.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_status_hu_7083b320d88f9f80.png 1024w"
+loading="lazy"
+alt="Certificate status"
+class="gallery-image"
+data-flex-grow="143"
+data-flex-basis="344px"
+>
+&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_select.png"
+width="1148"
+height="266"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_select_hu_29264943acadac75.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_select_hu_6785bedd7c762297.png 1024w"
+loading="lazy"
+alt="Select certificate"
+class="gallery-image"
+data-flex-grow="431"
+data-flex-basis="1035px"
+>&lt;/p>
+&lt;ol start="4">
+&lt;li>Edit Route 53 CNAME record
+Once the distrubution is deployed and enabled:
+&lt;ul>
+&lt;li>Go to &lt;strong>Route 53&lt;/strong> and edit the existing &lt;strong>CNAME&lt;/strong> record&lt;/li>
+&lt;li>Replace the value with the distribution domain name&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cname_change.png"
+width="782"
+height="832"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cname_change_hu_bfc6c01efe5882f.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cname_change_hu_6795f80e88a676f3.png 1024w"
+loading="lazy"
+alt="CNAME change"
+class="gallery-image"
+data-flex-grow="93"
+data-flex-basis="225px"
+>&lt;/p>
+&lt;ol start="5">
+&lt;li>Verify Website Accessibility
+If everything is configured correctly and running, you can now access the secure website.
+The website is now:
+&lt;ul>
+&lt;li>Globally distributed via &lt;strong>CloudFront&lt;/strong>&lt;/li>
+&lt;li>Securely accessible with &lt;strong>HTTPS&lt;/strong> via the ACM-issued cerficicate&lt;/li>
+&lt;li>Properly routed through the custom domain name&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/final.png"
+width="1140"
+height="822"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/final_hu_ec176af26488d888.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/final_hu_9c030b7aa680e136.png 1024w"
+loading="lazy"
+alt="Final website"
+class="gallery-image"
+data-flex-grow="138"
+data-flex-basis="332px"
+>&lt;/p>
+&lt;hr>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>By integrating AWS S3, Route 53, CloudFront, and ACM, we successfully hosted a static web application with a robust and modern infrastructure. The website is not only highly available and securely accessible via HTTPS, but also globally distributed with low latency and reachable through a custom domain. This setup ensures a smooth and reliable user experience while taking full advantage of AWS’s scalability, performance, and cost-effectiveness.&lt;/p></description></item><item><title>Host a Web Application on AWS</title><link>https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/</link><pubDate>Sun, 02 Feb 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/cloud-banner.png" alt="Featured image of post Host a Web Application on AWS" />&lt;p>This project demonstrates how to deploy a web application on a Linux-based AWS EC2 instance. While there are several ways to publish a web application, it focuses on using &lt;code>User data&lt;/code> to automate the setup. By leveraging user data, we can streamline the configuration process, allowing the instance to perform initial setup tasks automatically during boot.&lt;/p>
+&lt;ul>
+&lt;li>&lt;em>Prerequisites&lt;/em>
+&lt;ol>
+&lt;li>AWS account (preferably &lt;strong>IAM admin user&lt;/strong>)&lt;/li>
+&lt;li>Simple HTML code for static website&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="create-aws-ec2-instance">Create AWS EC2 instance
+&lt;/h1>&lt;p>Since this project has modest resource requirements, I have selected a minimum-level instance. Despite its low resource allocation, this instance is more than capable of efficiently serving the web application. Default settings are applied during the instance initialization process.&lt;/p>
+&lt;h2 id="basic-components">Basic components
+&lt;/h2>&lt;ul>
+&lt;li>AMI: &lt;code>Amazon Linux&lt;/code> - maximize efficiency, minimize power resources&lt;/li>
+&lt;li>Type: &lt;code>t2.micro&lt;/code> - free tier, perfect for small project&lt;/li>
+&lt;li>Firewall (security group): Create with the default settings&lt;/li>
+&lt;/ul>
+&lt;p>Instance summary:
+&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary.png"
+width="941"
+height="508"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary_hu_62d67b9a1b71478a.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary_hu_5a41ae67c116b695.png 1024w"
+loading="lazy"
+alt="Instance summary"
+class="gallery-image"
+data-flex-grow="185"
+data-flex-basis="444px"
+>&lt;/p>
+&lt;h2 id="additional-configuration">Additional configuration
+&lt;/h2>&lt;h3 id="firewall-configure-a-security-group-for-public-access">Firewall: Configure a &lt;code>security group&lt;/code> for public access
+&lt;/h3>&lt;ul>
+&lt;li>Add an inbound rule to allow traffic from public users&lt;/li>
+&lt;li>Ensure the &lt;code>HTTP/HTTPS&lt;/code> protocols are enabled, as they are essential for initiating and maintaining web services &lt;em>(HTTP is used to support this non-production project)&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Inbound rule&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Type: &lt;strong>HTTP&lt;/strong> provides &lt;code>request-response&lt;/code> service on a web browser between &lt;code>client-server&lt;/code>&lt;/li>
+&lt;li>Protocol: &lt;strong>TCP&lt;/strong> ensures reliable data transmission&lt;/li>
+&lt;li>Port: &lt;strong>80&lt;/strong> port number designated for HTTP&lt;/li>
+&lt;li>Source: &lt;strong>0.0.0.0/0&lt;/strong> indicates &lt;code>any&lt;/code> IP addresses (all range)&lt;/li>
+&lt;/ul>
+&lt;h2 id="writing-a-user-data">Writing a User Data
+&lt;/h2>&lt;p>User data is a powerful feature in AWS allows to automate tasks during the initialization of an EC2 instance. By providing a shell script in the User Data field, we can:&lt;/p>
+&lt;ul>
+&lt;li>Automate repetitive setup tasks, reducing manual intervention.&lt;/li>
+&lt;li>Configure and prepare the instance during its boot process, saving time.&lt;/li>
+&lt;li>Ensure the instance is ready to serve its purpose immediately after launch.&lt;/li>
+&lt;/ul>
+&lt;p>Below is the shell script that automates the tasks required to run a web server. Insert the script as a file (&lt;code>.sh&lt;/code>) or as a text in the box.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;span class="lnt">45
+&lt;/span>&lt;span class="lnt">46
+&lt;/span>&lt;span class="lnt">47
+&lt;/span>&lt;span class="lnt">48
+&lt;/span>&lt;span class="lnt">49
+&lt;/span>&lt;span class="lnt">50
+&lt;/span>&lt;span class="lnt">51
+&lt;/span>&lt;span class="lnt">52
+&lt;/span>&lt;span class="lnt">53
+&lt;/span>&lt;span class="lnt">54
+&lt;/span>&lt;span class="lnt">55
+&lt;/span>&lt;span class="lnt">56
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 1. System Update &amp;amp; Installation&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Ensure the system is up to date and installs web server (Nginx).&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># After updates, start and enable the Nginx service.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">#!/bin/bash&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Escalate to admin user&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo su
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Update and install system package&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">yum update -y
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">yum install nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Start the web server&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl start nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl &lt;span class="nb">enable&lt;/span> nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Confirm the web service starts on boot&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">chkconfig nginx on
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 2. Retrieving AWS Metadata&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Retrieves AWS instance metadata for live demonstration.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Extract and save instance&amp;#39;s `availability zone` as a variable- AZ.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Retrieve metadata of the instance&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">TOKEN&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sb">`&lt;/span>curl -X PUT &lt;span class="s2">&amp;#34;http://169.254.169.254/latest/api/token&amp;#34;&lt;/span> -H &lt;span class="s2">&amp;#34;X-aws-ec2-metadata-token-ttl-seconds: 21600&amp;#34;&lt;/span>&lt;span class="sb">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">AZ&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sb">`&lt;/span>curl -H &lt;span class="s2">&amp;#34;X-aws-ec2-metadata-token: &lt;/span>&lt;span class="nv">$TOKEN&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> http://169.254.169.254/latest/meta-data/placement/availability-zone&lt;span class="sb">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 3. Create a Web Page File&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create an `index.html` file as a default landing page.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create a web page file in .html&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">cat &amp;gt; /usr/share/nginx/html/index.html &lt;span class="s">&amp;lt;&amp;lt;EOF
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;!DOCTYPE html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;meta charset=&amp;#34;utf-8&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;title&amp;gt;WebApp | Rose&amp;lt;/title&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;style&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    body {
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      color: #f0f8ff;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      background-color: #809b4c;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      font-family: Tahoma, Verdana, Arial, sans-serif;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    }
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;/style&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;div align=&amp;#34;center&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h1&amp;gt;NGINX Web App&amp;lt;/h1&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h2&amp;gt;This application was deployed from AWS EC2&amp;lt;/h2&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h3&amp;gt;Instance Availability Zone: $AZ&amp;lt;/h3&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;p&amp;gt;Rose Jang&amp;lt;/p&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;/div&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">EOF&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h1 id="run-the-instance--web-server">Run the instance &amp;amp; Web server
+&lt;/h1>&lt;p>Using the user data script, we pre-configured everything necessary for the web server:&lt;/p>
+&lt;ul>
+&lt;li>Installed and configured the web server&lt;/li>
+&lt;li>Started and enabled the web server&lt;/li>
+&lt;li>Created and saved an &lt;code>index.html&lt;/code> file to server as the landing page&lt;/li>
+&lt;/ul>
+&lt;p>Now it&amp;rsquo;s time to test the web server by launching the instance and verifying that it is running successfully.&lt;/p>
+&lt;h2 id="launching-the-instance">Launching the Instance
+&lt;/h2>&lt;p>Double-check the instance settings and the shell script correctly saved in user data. Also ensure that the Security Group has an inbound rule allowing &lt;code>http&lt;/code> traffic (port 80) to enable public access to the web server.&lt;/p>
+&lt;h2 id="locate-the-instance-details">Locate the Instance Details
+&lt;/h2>&lt;p>Once the instance is running, navigate to the &lt;code>Details&lt;/code> section to check its status and availability zone. This will be used to verify if the metadata is correctly passed in the script. Locate the &lt;strong>public IP address&lt;/strong> to access the web server. Ensure the instance is in a &amp;ldquo;Running&amp;rdquo; state and that all health checks have passed before proceeding.&lt;/p>
+&lt;p>Instance details&lt;/p>
+&lt;ul>
+&lt;li>ID: ending with &lt;strong>d7d7&lt;/strong>&lt;/li>
+&lt;li>Availability Zone: &lt;strong>us-east-1c&lt;/strong>&lt;/li>
+&lt;li>Public IP address: &lt;strong>54.91.44.217&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ.png"
+width="2132"
+height="127"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ_hu_9e2e8ba06f2f8ef4.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ_hu_5464b925342e17a9.png 1024w"
+loading="lazy"
+alt="Instance Available Zone"
+class="gallery-image"
+data-flex-grow="1678"
+data-flex-basis="4028px"
+>&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP.png"
+width="2178"
+height="490"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP_hu_20bf36a29b8d7b44.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP_hu_4d3fc96479fade45.png 1024w"
+loading="lazy"
+alt="Instance IP address"
+class="gallery-image"
+data-flex-grow="444"
+data-flex-basis="1066px"
+>&lt;/p>
+&lt;h2 id="test-the-web-server">Test the Web Server
+&lt;/h2>&lt;p>Access the public IP address in a web browser using &lt;code>http&lt;/code> protocol.
+&lt;code>(ex. http://54.91.44.217)&lt;/code>
+Confirm that the Nginx web server is running and the landing page matches the content of the &lt;code>index.html&lt;/code> file.&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp.png"
+width="1820"
+height="520"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp_hu_b29ec2954f3f2a07.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp_hu_b7fc48d94d2a68ae.png 1024w"
+loading="lazy"
+alt="Web app result"
+class="gallery-image"
+data-flex-grow="350"
+data-flex-basis="840px"
+>&lt;/p>
+&lt;h3 id="tip">&lt;em>TIP!&lt;/em>
+&lt;/h3>&lt;p>If the web server is not running or there are any issues, check the log file for details.
+The log file provides detailed information about the execution of the user data script and helps troubleshoot any errors or misconfigurations.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">cat&lt;/span> &lt;span class="o">/&lt;/span>&lt;span class="k">var&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="nb">log&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">cloud&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">init&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">output&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">log&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>This project successfully demonstrated how to deploy a web application on an AWS EC2 instance using Nginx. Utilizing &lt;code>User data&lt;/code> reduces time on initializing core configurations including web server installation, setup, and deployment of a static landing page. This streamlined approach highlights the efficiency and flexibility of cloud infrastructure for hosting a web application.&lt;/p></description></item></channel></rss>
