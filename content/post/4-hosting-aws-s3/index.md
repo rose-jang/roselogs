@@ -19,7 +19,7 @@ In this project, I built a simple **note-taking web app** that features a clean 
 
 * *Prerequisites*
 	1. AWS account (preferably **IAM admin user**)
-	2. Note-Taking Website files (Check out this repo- [Link](https://github.com/rose-jang/web-takenote))
+	2. Static website files
 	3. Domain name
 
 # Used AWS Services
