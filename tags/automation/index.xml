@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Automation on Rose Jang</title><link>https://rose-jang.github.io/roselogs/tags/automation/</link><description>Recent content in Automation on Rose Jang</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 02 Feb 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://rose-jang.github.io/roselogs/tags/automation/index.xml" rel="self" type="application/rss+xml"/><item><title>Host a Web Application on AWS</title><link>https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/</link><pubDate>Sun, 02 Feb 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/cloud-banner.png" alt="Featured image of post Host a Web Application on AWS" />&lt;p>This project demonstrates how to deploy a web application on a Linux-based AWS EC2 instance. While there are several ways to publish a web application, it focuses on using &lt;code>User data&lt;/code> to automate the setup. By leveraging user data, we can streamline the configuration process, allowing the instance to perform initial setup tasks automatically during boot.&lt;/p>
+&lt;ul>
+&lt;li>&lt;em>Prerequisites&lt;/em>
+&lt;ol>
+&lt;li>AWS account (preferably &lt;strong>IAM admin user&lt;/strong>)&lt;/li>
+&lt;li>Simple HTML code for static website&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="create-aws-ec2-instance">Create AWS EC2 instance
+&lt;/h1>&lt;p>Since this project has modest resource requirements, I have selected a minimum-level instance. Despite its low resource allocation, this instance is more than capable of efficiently serving the web application. Default settings are applied during the instance initialization process.&lt;/p>
+&lt;h2 id="basic-components">Basic components
+&lt;/h2>&lt;ul>
+&lt;li>AMI: &lt;code>Amazon Linux&lt;/code> - maximize efficiency, minimize power resources&lt;/li>
+&lt;li>Type: &lt;code>t2.micro&lt;/code> - free tier, perfect for small project&lt;/li>
+&lt;li>Firewall (security group): Create with the default settings&lt;/li>
+&lt;/ul>
+&lt;p>Instance summary:
+&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary.png"
+width="941"
+height="508"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary_hu_62d67b9a1b71478a.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary_hu_5a41ae67c116b695.png 1024w"
+loading="lazy"
+alt="Instance summary"
+class="gallery-image"
+data-flex-grow="185"
+data-flex-basis="444px"
+>&lt;/p>
+&lt;h2 id="additional-configuration">Additional configuration
+&lt;/h2>&lt;h3 id="firewall-configure-a-security-group-for-public-access">Firewall: Configure a &lt;code>security group&lt;/code> for public access
+&lt;/h3>&lt;ul>
+&lt;li>Add an inbound rule to allow traffic from public users&lt;/li>
+&lt;li>Ensure the &lt;code>HTTP/HTTPS&lt;/code> protocols are enabled, as they are essential for initiating and maintaining web services &lt;em>(HTTP is used to support this non-production project)&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Inbound rule&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Type: &lt;strong>HTTP&lt;/strong> provides &lt;code>request-response&lt;/code> service on a web browser between &lt;code>client-server&lt;/code>&lt;/li>
+&lt;li>Protocol: &lt;strong>TCP&lt;/strong> ensures reliable data transmission&lt;/li>
+&lt;li>Port: &lt;strong>80&lt;/strong> port number designated for HTTP&lt;/li>
+&lt;li>Source: &lt;strong>0.0.0.0/0&lt;/strong> indicates &lt;code>any&lt;/code> IP addresses (all range)&lt;/li>
+&lt;/ul>
+&lt;h2 id="writing-a-user-data">Writing a User Data
+&lt;/h2>&lt;p>User data is a powerful feature in AWS allows to automate tasks during the initialization of an EC2 instance. By providing a shell script in the User Data field, we can:&lt;/p>
+&lt;ul>
+&lt;li>Automate repetitive setup tasks, reducing manual intervention.&lt;/li>
+&lt;li>Configure and prepare the instance during its boot process, saving time.&lt;/li>
+&lt;li>Ensure the instance is ready to serve its purpose immediately after launch.&lt;/li>
+&lt;/ul>
+&lt;p>Below is the shell script that automates the tasks required to run a web server. Insert the script as a file (&lt;code>.sh&lt;/code>) or as a text in the box.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;span class="lnt">45
+&lt;/span>&lt;span class="lnt">46
+&lt;/span>&lt;span class="lnt">47
+&lt;/span>&lt;span class="lnt">48
+&lt;/span>&lt;span class="lnt">49
+&lt;/span>&lt;span class="lnt">50
+&lt;/span>&lt;span class="lnt">51
+&lt;/span>&lt;span class="lnt">52
+&lt;/span>&lt;span class="lnt">53
+&lt;/span>&lt;span class="lnt">54
+&lt;/span>&lt;span class="lnt">55
+&lt;/span>&lt;span class="lnt">56
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 1. System Update &amp;amp; Installation&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Ensure the system is up to date and installs web server (Nginx).&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># After updates, start and enable the Nginx service.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">#!/bin/bash&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Escalate to admin user&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo su
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Update and install system package&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">yum update -y
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">yum install nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Start the web server&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl start nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl &lt;span class="nb">enable&lt;/span> nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Confirm the web service starts on boot&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">chkconfig nginx on
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 2. Retrieving AWS Metadata&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Retrieves AWS instance metadata for live demonstration.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Extract and save instance&amp;#39;s `availability zone` as a variable- AZ.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Retrieve metadata of the instance&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">TOKEN&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sb">`&lt;/span>curl -X PUT &lt;span class="s2">&amp;#34;http://169.254.169.254/latest/api/token&amp;#34;&lt;/span> -H &lt;span class="s2">&amp;#34;X-aws-ec2-metadata-token-ttl-seconds: 21600&amp;#34;&lt;/span>&lt;span class="sb">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">AZ&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sb">`&lt;/span>curl -H &lt;span class="s2">&amp;#34;X-aws-ec2-metadata-token: &lt;/span>&lt;span class="nv">$TOKEN&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> http://169.254.169.254/latest/meta-data/placement/availability-zone&lt;span class="sb">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 3. Create a Web Page File&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create an `index.html` file as a default landing page.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create a web page file in .html&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">cat &amp;gt; /usr/share/nginx/html/index.html &lt;span class="s">&amp;lt;&amp;lt;EOF
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;!DOCTYPE html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;meta charset=&amp;#34;utf-8&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;title&amp;gt;WebApp | Rose&amp;lt;/title&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;style&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    body {
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      color: #f0f8ff;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      background-color: #809b4c;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      font-family: Tahoma, Verdana, Arial, sans-serif;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    }
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;/style&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;div align=&amp;#34;center&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h1&amp;gt;NGINX Web App&amp;lt;/h1&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h2&amp;gt;This application was deployed from AWS EC2&amp;lt;/h2&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h3&amp;gt;Instance Availability Zone: $AZ&amp;lt;/h3&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;p&amp;gt;Rose Jang&amp;lt;/p&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;/div&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">EOF&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h1 id="run-the-instance--web-server">Run the instance &amp;amp; Web server
+&lt;/h1>&lt;p>Using the user data script, we pre-configured everything necessary for the web server:&lt;/p>
+&lt;ul>
+&lt;li>Installed and configured the web server&lt;/li>
+&lt;li>Started and enabled the web server&lt;/li>
+&lt;li>Created and saved an &lt;code>index.html&lt;/code> file to server as the landing page&lt;/li>
+&lt;/ul>
+&lt;p>Now it&amp;rsquo;s time to test the web server by launching the instance and verifying that it is running successfully.&lt;/p>
+&lt;h2 id="launching-the-instance">Launching the Instance
+&lt;/h2>&lt;p>Double-check the instance settings and the shell script correctly saved in user data. Also ensure that the Security Group has an inbound rule allowing &lt;code>http&lt;/code> traffic (port 80) to enable public access to the web server.&lt;/p>
+&lt;h2 id="locate-the-instance-details">Locate the Instance Details
+&lt;/h2>&lt;p>Once the instance is running, navigate to the &lt;code>Details&lt;/code> section to check its status and availability zone. This will be used to verify if the metadata is correctly passed in the script. Locate the &lt;strong>public IP address&lt;/strong> to access the web server. Ensure the instance is in a &amp;ldquo;Running&amp;rdquo; state and that all health checks have passed before proceeding.&lt;/p>
+&lt;p>Instance details&lt;/p>
+&lt;ul>
+&lt;li>ID: ending with &lt;strong>d7d7&lt;/strong>&lt;/li>
+&lt;li>Availability Zone: &lt;strong>us-east-1c&lt;/strong>&lt;/li>
+&lt;li>Public IP address: &lt;strong>54.91.44.217&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ.png"
+width="2132"
+height="127"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ_hu_9e2e8ba06f2f8ef4.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ_hu_5464b925342e17a9.png 1024w"
+loading="lazy"
+alt="Instance Available Zone"
+class="gallery-image"
+data-flex-grow="1678"
+data-flex-basis="4028px"
+>&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP.png"
+width="2178"
+height="490"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP_hu_20bf36a29b8d7b44.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP_hu_4d3fc96479fade45.png 1024w"
+loading="lazy"
+alt="Instance IP address"
+class="gallery-image"
+data-flex-grow="444"
+data-flex-basis="1066px"
+>&lt;/p>
+&lt;h2 id="test-the-web-server">Test the Web Server
+&lt;/h2>&lt;p>Access the public IP address in a web browser using &lt;code>http&lt;/code> protocol.
+&lt;code>(ex. http://54.91.44.217)&lt;/code>
+Confirm that the Nginx web server is running and the landing page matches the content of the &lt;code>index.html&lt;/code> file.&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp.png"
+width="1820"
+height="520"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp_hu_b29ec2954f3f2a07.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp_hu_b7fc48d94d2a68ae.png 1024w"
+loading="lazy"
+alt="Web app result"
+class="gallery-image"
+data-flex-grow="350"
+data-flex-basis="840px"
+>&lt;/p>
+&lt;h3 id="tip">&lt;em>TIP!&lt;/em>
+&lt;/h3>&lt;p>If the web server is not running or there are any issues, check the log file for details.
+The log file provides detailed information about the execution of the user data script and helps troubleshoot any errors or misconfigurations.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">cat&lt;/span> &lt;span class="o">/&lt;/span>&lt;span class="k">var&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="nb">log&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">cloud&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">init&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">output&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">log&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>This project successfully demonstrated how to deploy a web application on an AWS EC2 instance using Nginx. Utilizing &lt;code>User data&lt;/code> reduces time on initializing core configurations including web server installation, setup, and deployment of a static landing page. This streamlined approach highlights the efficiency and flexibility of cloud infrastructure for hosting a web application.&lt;/p></description></item></channel></rss>

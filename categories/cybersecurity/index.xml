@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cybersecurity on Rose Jang</title><link>https://rose-jang.github.io/roselogs/categories/cybersecurity/</link><description>Recent content in Cybersecurity on Rose Jang</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 16 May 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://rose-jang.github.io/roselogs/categories/cybersecurity/index.xml" rel="self" type="application/rss+xml"/><item><title>Understanding the Cyber Kill Chain</title><link>https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/</link><pubDate>Fri, 16 May 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/cyberkillchain-banner.png" alt="Featured image of post Understanding the Cyber Kill Chain" />&lt;h1 id="cyber-kill-chain">Cyber Kill Chain
+&lt;/h1>&lt;p>To effectively defend a network, we must learn to think like an attacker. By understanding how cyber attacks unfold, we can proactively secure our systems and prevent damage before it happens. One of the key steps in that process is learning the &lt;strong>Cyber Kill Chain&lt;/strong>.&lt;/p>
+&lt;h2 id="what-is-it">What is it?
+&lt;/h2>&lt;p>The &lt;strong>Cyber Kill Chain&lt;/strong> is a foundational framework in cybersecurity that outlines the typical stages of a cyber attack—from initial planning to achieving the attacker’s end goal. Developed by Lockheed Martin, this model helps security teams understand the attack lifecycle in depth. By identifying and interrupting attacks at various stages, defenders can significantly reduce the likelihood of a successful breach.&lt;/p>
+&lt;h2 id="7-stages">7 Stages
+&lt;/h2>&lt;h3 id="1-reconnaissance">1-Reconnaissance
+&lt;/h3>&lt;p>Planning phase, attackers gather information about their target&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Passive&lt;/strong>: Collect data without direct interaction (&lt;em>e.g., archived websites, social media, public records&lt;/em>)&lt;/li>
+&lt;li>&lt;strong>Active&lt;/strong>: Direct engagement (&lt;em>e.g., scanning ports, pining servers&lt;/em>**)**&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;p>&lt;strong>Defender’s role&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Avoid publicly exposed information&lt;/li>
+&lt;li>Patch known vulnerability in an early stage&lt;/li>
+&lt;li>Monitor suspicious network activity (scanning or probing)&lt;/li>
+&lt;/ul>
+&lt;h3 id="2-weaponization">2-Weaponization
+&lt;/h3>&lt;p>Prepare a payload (bundle of malicious codes) to exploit using the information collected&lt;/p>
+&lt;p>&lt;strong>Defender’s role&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Use the latest threat intelligence&lt;/li>
+&lt;li>Configure detection rules for common exploits&lt;/li>
+&lt;/ul>
+&lt;h3 id="3-delivery">3-Delivery
+&lt;/h3>&lt;p>Expose the payload to lure victims (vis phishing emails, malicious websites/attachments, USBs, …)&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>Test suspicious files in sandbox&lt;/li>
+&lt;li>Educate users on phishing attacks&lt;/li>
+&lt;li>Monitor for unusual behaviour&lt;/li>
+&lt;/ul>
+&lt;h3 id="4-exploitation">4-Exploitation
+&lt;/h3>&lt;p>Payload executed once vulnerability is triggered&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>User training to avoid clicking suspicious links/files&lt;/li>
+&lt;li>EDR (Endpoint Detection &amp;amp; Response) monitoring&lt;/li>
+&lt;li>Continuous monitoring for unusual behaviour&lt;/li>
+&lt;/ul>
+&lt;h3 id="5-installation">5-Installation
+&lt;/h3>&lt;p>Malware installation (backdoor, web shell) on the compromised system&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>Monitor OS settings change&lt;/li>
+&lt;li>Block unauthorized system tasks or services&lt;/li>
+&lt;li>Threat hunting to detect uncommon installation&lt;/li>
+&lt;/ul>
+&lt;h3 id="6-commandcontrol-c2">6-Command&amp;amp;Control (C2)
+&lt;/h3>&lt;p>The malware contacts a remote server that manipulates the infected machine&lt;/p>
+&lt;p>&lt;strong>Defender’s role:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Analyze outbound traffic&lt;/li>
+&lt;li>Block known malicious IPs/domains&lt;/li>
+&lt;li>Isolate infected systems&lt;/li>
+&lt;/ul>
+&lt;h3 id="7-actions-on-objectives">7-Actions on Objectives
+&lt;/h3>&lt;p>Accomplish initial goals by stealing data, damage systems, or ransomware, …&lt;/p>
+&lt;p>&lt;strong>Defender’s role:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Restrict network access from external&lt;/li>
+&lt;li>Implement DLP to prevent data leakage&lt;/li>
+&lt;li>Lock down sensitive resources&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>We explored the stages of the Cyber Kill Chain that offers valuable insight into how attackers operate, and how defenders respond at each phase. Understanding this model is a crucial step toward building a proactive and effective cybersecurity strategy.&lt;/p></description></item></channel></rss>
