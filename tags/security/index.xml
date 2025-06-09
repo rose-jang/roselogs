@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Security on Rose Jang</title><link>https://rose-jang.github.io/roselogs/tags/security/</link><description>Recent content in Security on Rose Jang</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 08 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://rose-jang.github.io/roselogs/tags/security/index.xml" rel="self" type="application/rss+xml"/><item><title>SOC Environment Home Lab - Setting Up</title><link>https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/</link><pubDate>Sun, 08 Jun 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/socHomeLab-banner.png" alt="Featured image of post SOC Environment Home Lab - Setting Up" />&lt;h1 id="introduction">Introduction
+&lt;/h1>&lt;p>This project simulates a simplified Security Operations Centre (SOC) environment within a small enterprise network. It uses open-source tools including &lt;strong>Wazuh&lt;/strong>, &lt;strong>Snort&lt;/strong>, and &lt;strong>Sysmon&lt;/strong> — to demonstrate how cyberattacks can be detected and monitored in real-time.&lt;/p>
+&lt;p>In this post, it focuses on setting up the internal network and essential security tools. Real-world attack scenarios will be excecuted to observe how the SOC components respond in the next post.&lt;/p>
+&lt;p>By emulating a realistic attack-and-defense scenario, this project aims to deepen understanding of SOC operations and network security monitoring.&lt;/p>
+&lt;h1 id="scenario-overview">Scenario Overview
+&lt;/h1>&lt;p>The SOC home lab consists of &lt;strong>three virtual machines&lt;/strong> running on &lt;strong>VirtualBox&lt;/strong>, each serving a different role:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Victim&lt;/strong>: A &lt;strong>Windows&lt;/strong> machine with &lt;strong>Sysmon&lt;/strong> and the &lt;strong>Wazuh&lt;/strong> agent installed to log and send system activity data.&lt;/li>
+&lt;li>&lt;strong>SOC Server&lt;/strong>: An &lt;strong>Ubuntu&lt;/strong> machine running &lt;strong>Wazuh&lt;/strong> (as the SIEM) and &lt;strong>Snort&lt;/strong> (as the IDS) to collect, analyze, and alert on suspicious behaviour.&lt;/li>
+&lt;li>&lt;strong>Attacker&lt;/strong>: A &lt;strong>Kali&lt;/strong> Linux machine used to simulate offensive actions, including port scanning and credential dumping using tools like &lt;strong>Nmap&lt;/strong> and &lt;strong>Mimikatz&lt;/strong>.&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>This setup assumes that the attacker already has gained access to the internal network. This reflects post-compromise behaviour for realistic threat emulation.&lt;/p>&lt;/blockquote>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/diagram.png"
+width="1495"
+height="943"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/diagram_hu_9424cd89fdf30edf.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/diagram_hu_6bb79cbaeee8c0ec.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="158"
+data-flex-basis="380px"
+>&lt;/p>
+&lt;hr>
+&lt;h1 id="environment-setup">Environment Setup
+&lt;/h1>&lt;h2 id="network-configuration">Network configuration
+&lt;/h2>&lt;p>All virtual machines in this lab are connected using a &lt;strong>Host-only network adapter&lt;/strong> to ensure isolation from the internet, allowing safe and controlled testing. Each machine is configured with a &lt;strong>static IP address&lt;/strong> to simplify traffic analysis and eliminate ambiguity during monitoring.&lt;/p>
+&lt;p>&lt;strong>Static IP assignments&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Ubuntu (SOC Server): &lt;code>192.168.56.10&lt;/code>&lt;/li>
+&lt;li>Windows (Victim): &lt;code>192.168.56.20&lt;/code>&lt;/li>
+&lt;li>Kali (Attacker): &lt;code>192.168.56.30&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="tooling--configuration">Tooling &amp;amp; Configuration
+&lt;/h2>&lt;h2 id="ubuntu---soc-server">Ubuntu - SOC Server
+&lt;/h2>&lt;h3 id="siem-wazuh">SIEM: Wazuh
+&lt;/h3>&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Install &lt;strong>Wazuh&lt;/strong> &lt;strong>All-in-One&lt;/strong> package (from &lt;a class="link" href="https://documentation.wazuh.com/current/quickstart.html" target="_blank" rel="noopener"
+>&lt;strong>Wazuh Quickstart&lt;/strong>&lt;/a>), which includes:
+&lt;ul>
+&lt;li>Wazuh Manager&lt;/li>
+&lt;li>Filebeat&lt;/li>
+&lt;li>Elasticsearch&lt;/li>
+&lt;li>Kibana&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Verify server dashboard access:
+&lt;ul>
+&lt;li>Server IP: 192.168.56.10, Port 5601&lt;/li>
+&lt;li>URL: &lt;code>http://[serverIP]:5601&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>Agent Deployment&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Add an agent from Wazuh dashboard&lt;/li>
+&lt;li>Troubleshooting for agent deployment on dashboard
+a. Run the agent manager in CLI:
+&lt;code>sudo /var/ossec/bin/manage_agents&lt;/code>
+b. Follow prompts to create an agent
+c. Extract the authentication key of the agent
+d. Enter the key into the Wazuh Agent software on Windows machine
+e. Restart both the agent and server&lt;/li>
+&lt;li>Confirm the Windows machine appears in the dashboard&lt;/li>
+&lt;/ol>
+&lt;h3 id="idsipd-snort">IDS/IPD: Snort
+&lt;/h3>&lt;p>&lt;strong>Quick Note: Difference between IDS/IPS?&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>IDS (Intrusion Detection System) alerts on suspicious activities based on defined rules.&lt;/li>
+&lt;li>IPS (Intrusion Prevention System) acts a step further by actively responding to malicious traffics.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Install in CLI:
+&lt;code>sudo apt-get install snort -y&lt;/code>&lt;/li>
+&lt;li>Define the network range to monitor during installation (e.g., 192.168.56.0/24)&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-installation.png"
+width="1414"
+height="679"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-installation_hu_a027300c10e4ebb.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-installation_hu_558f4e686b4519b2.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="208"
+data-flex-basis="499px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>Test Snort:
+&lt;code>sudo snort -v&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-test.png"
+width="1721"
+height="1196"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-test_hu_34398e3942150f07.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-test_hu_a7c0c5207800a84b.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="143"
+data-flex-basis="345px"
+>&lt;/p>
+&lt;p>&lt;strong>Configuration&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Snort file path&lt;/strong>
+&lt;ul>
+&lt;li>Configs: &lt;strong>/etc/snort&lt;/strong>&lt;/li>
+&lt;li>Logs: &lt;strong>/var/log/snort&lt;/strong>&lt;/li>
+&lt;li>Rules: &lt;strong>/etc/snort/rules&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;ol>
+&lt;li>Rule configuration&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Add rules into the file &amp;gt; &lt;code>/etc/snort/rules/local.rules&lt;/code>&lt;/li>
+&lt;li>Alert rule configuration structure:
+&lt;ul>
+&lt;li>Header - Body - Actions&lt;/li>
+&lt;li>alert [protocol] [source] [port] → [destination] [port] (body… msg:”~~detected”;)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Detect open port scanning&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">alert tcp any any -&amp;gt; &lt;span class="nv">$HOME_NET&lt;/span> 1:1024 &lt;span class="o">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> flags: S&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> msg: &lt;span class="s2">&amp;#34;PORT SCAN detected&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> threshold: &lt;span class="nb">type&lt;/span> both, track by_src, count 10, seconds 3&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sid: 1001&lt;span class="p">;&lt;/span> rev: 1&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Detect Mimikatz&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">alert tcp any any -&amp;gt; &lt;span class="nv">$HOME_NET&lt;/span> any &lt;span class="o">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> msg: &lt;span class="s2">&amp;#34;Mimikatz detected&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> content: &lt;span class="s2">&amp;#34;mimikatz&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> nocase&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sed: 1002&lt;span class="p">;&lt;/span> rev: 1&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>Detect open port scanning
+&lt;ul>
+&lt;li>&lt;code>flags: S;&lt;/code> # Flags for TCP &lt;strong>SYN&lt;/strong>&lt;/li>
+&lt;li>&lt;code>threshold:&lt;/code> # Triggers when 10 SYN packets in 3 seconds&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Detect Mimikatz
+&lt;ul>
+&lt;li>&lt;code>content:&lt;/code> # Detects a string “mimikatz”, case insensitive&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="windows---victim">Windows - Victim
+&lt;/h2>&lt;h3 id="sysmon-activity-logging">Sysmon: Activity logging
+&lt;/h3>&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Download Sysmon file on &lt;a class="link" href="https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon" target="_blank" rel="noopener"
+>Microsoft official site&lt;/a>&lt;/li>
+&lt;li>Use the configuration file &lt;a class="link" href="https://wazuh.com/resources/blog/emulation-of-attack-techniques-and-detection-with-wazuh/sysmonconfig.xml" target="_blank" rel="noopener"
+>provided by Wazuh&lt;/a> (save as XML file)&lt;/li>
+&lt;li>Install via PowerShell:
+&lt;code>./sysmon64.exe -i sysconfig.xml&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h3 id="wazuh-agent">Wazuh Agent
+&lt;/h3>&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Install by using command retrieved from Wazuh dashboard&lt;/li>
+&lt;li>Or insert authentication key from Agent management
+&amp;gt; Refer to the &lt;strong>Agent deployment&lt;/strong> in &lt;strong>SIEM: Wazuh&lt;/strong> section above
+&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-agent.png"
+width="712"
+height="654"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-agent_hu_777174e2e1e7031f.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-agent_hu_a9a083e5c1021554.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="108"
+data-flex-basis="261px"
+>&lt;/li>
+&lt;li>Confirm logs and events appearing on the Wazuh dashboard
+&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-dashboard.png"
+width="896"
+height="148"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-dashboard_hu_938f4157528d4acb.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-dashboard_hu_9f2dd868196d024f.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="605"
+data-flex-basis="1452px"
+>&lt;/li>
+&lt;/ol>
+&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>This post covered the setup of a simplified SOC lab using tools such as Wazuh, Snort, and Sysmon across isolated virtual machines. By isolating the network and configuring static IPs, we created a controlled space for observing attacker behaviors and system responses. With all components successfully deployed and communicating, the foundation is now ready for simulating and detecting real-world cyberattacks.&lt;/p>
+&lt;p>The simulation using penetration tools on Kali will be demonstrated in the next blog post.&lt;/p></description></item><item><title>Understanding the Cyber Kill Chain</title><link>https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/</link><pubDate>Fri, 16 May 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/cyberkillchain-banner.png" alt="Featured image of post Understanding the Cyber Kill Chain" />&lt;h1 id="cyber-kill-chain">Cyber Kill Chain
+&lt;/h1>&lt;p>To effectively defend a network, we must learn to think like an attacker. By understanding how cyber attacks unfold, we can proactively secure our systems and prevent damage before it happens. One of the key steps in that process is learning the &lt;strong>Cyber Kill Chain&lt;/strong>.&lt;/p>
+&lt;h2 id="what-is-it">What is it?
+&lt;/h2>&lt;p>The &lt;strong>Cyber Kill Chain&lt;/strong> is a foundational framework in cybersecurity that outlines the typical stages of a cyber attack—from initial planning to achieving the attacker’s end goal. Developed by Lockheed Martin, this model helps security teams understand the attack lifecycle in depth. By identifying and interrupting attacks at various stages, defenders can significantly reduce the likelihood of a successful breach.&lt;/p>
+&lt;h2 id="7-stages">7 Stages
+&lt;/h2>&lt;h3 id="1-reconnaissance">1-Reconnaissance
+&lt;/h3>&lt;p>Planning phase, attackers gather information about their target&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Passive&lt;/strong>: Collect data without direct interaction (&lt;em>e.g., archived websites, social media, public records&lt;/em>)&lt;/li>
+&lt;li>&lt;strong>Active&lt;/strong>: Direct engagement (&lt;em>e.g., scanning ports, pining servers&lt;/em>**)**&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;p>&lt;strong>Defender’s role&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Avoid publicly exposed information&lt;/li>
+&lt;li>Patch known vulnerability in an early stage&lt;/li>
+&lt;li>Monitor suspicious network activity (scanning or probing)&lt;/li>
+&lt;/ul>
+&lt;h3 id="2-weaponization">2-Weaponization
+&lt;/h3>&lt;p>Prepare a payload (bundle of malicious codes) to exploit using the information collected&lt;/p>
+&lt;p>&lt;strong>Defender’s role&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Use the latest threat intelligence&lt;/li>
+&lt;li>Configure detection rules for common exploits&lt;/li>
+&lt;/ul>
+&lt;h3 id="3-delivery">3-Delivery
+&lt;/h3>&lt;p>Expose the payload to lure victims (vis phishing emails, malicious websites/attachments, USBs, …)&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>Test suspicious files in sandbox&lt;/li>
+&lt;li>Educate users on phishing attacks&lt;/li>
+&lt;li>Monitor for unusual behaviour&lt;/li>
+&lt;/ul>
+&lt;h3 id="4-exploitation">4-Exploitation
+&lt;/h3>&lt;p>Payload executed once vulnerability is triggered&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>User training to avoid clicking suspicious links/files&lt;/li>
+&lt;li>EDR (Endpoint Detection &amp;amp; Response) monitoring&lt;/li>
+&lt;li>Continuous monitoring for unusual behaviour&lt;/li>
+&lt;/ul>
+&lt;h3 id="5-installation">5-Installation
+&lt;/h3>&lt;p>Malware installation (backdoor, web shell) on the compromised system&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>Monitor OS settings change&lt;/li>
+&lt;li>Block unauthorized system tasks or services&lt;/li>
+&lt;li>Threat hunting to detect uncommon installation&lt;/li>
+&lt;/ul>
+&lt;h3 id="6-commandcontrol-c2">6-Command&amp;amp;Control (C2)
+&lt;/h3>&lt;p>The malware contacts a remote server that manipulates the infected machine&lt;/p>
+&lt;p>&lt;strong>Defender’s role:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Analyze outbound traffic&lt;/li>
+&lt;li>Block known malicious IPs/domains&lt;/li>
+&lt;li>Isolate infected systems&lt;/li>
+&lt;/ul>
+&lt;h3 id="7-actions-on-objectives">7-Actions on Objectives
+&lt;/h3>&lt;p>Accomplish initial goals by stealing data, damage systems, or ransomware, …&lt;/p>
+&lt;p>&lt;strong>Defender’s role:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Restrict network access from external&lt;/li>
+&lt;li>Implement DLP to prevent data leakage&lt;/li>
+&lt;li>Lock down sensitive resources&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>We explored the stages of the Cyber Kill Chain that offers valuable insight into how attackers operate, and how defenders respond at each phase. Understanding this model is a crucial step toward building a proactive and effective cybersecurity strategy.&lt;/p></description></item></channel></rss>

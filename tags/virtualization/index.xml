@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Virtualization on Rose Jang</title><link>https://rose-jang.github.io/roselogs/tags/virtualization/</link><description>Recent content in Virtualization on Rose Jang</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 27 Mar 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://rose-jang.github.io/roselogs/tags/virtualization/index.xml" rel="self" type="application/rss+xml"/><item><title>Kubernetes Basics</title><link>https://rose-jang.github.io/roselogs/p/kubernetes-basics/</link><pubDate>Thu, 27 Mar 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/kubernetes-basics/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/kubernetes-basics/k8s-banner.png" alt="Featured image of post Kubernetes Basics" />&lt;h1 id="what-is-kubernetes">What is Kubernetes?
+&lt;/h1>&lt;p>&lt;strong>Kubernetes&lt;/strong> is an open-source platform designed to manage containerized applications at scale. It automates the deployment, scaling, and management of application containers across clusters of machines.&lt;/p>
+&lt;p>Kubernetes is capable of running thousands of replicas of an application simultaneously, ensuring high availability and reliability. Each replica (an instance of an application) can be accompanied by additional containers, such as &lt;strong>sidecars&lt;/strong>, which serve as &amp;ldquo;managers&amp;rdquo; performing essential tasks such as logging, proxying, or monitoring.&lt;/p>
+&lt;p>A key concept in Kubernetes is the shared lifecycle of containers within a pod, ensuring that all components of the application work together seamlessly. This design simplifies the deployment and management of applications, especially in large-scale environments where consistency and reliability are paramount.&lt;/p>
+&lt;hr>
+&lt;h2 id="fundamental-components">Fundamental Components
+&lt;/h2>&lt;h3 id="containers">Containers
+&lt;/h3>&lt;p>&lt;em>Packaging all dependencies, code, and runtime of exact versions&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Containers ensures smooth operation across both development and production environments.&lt;/li>
+&lt;li>Since modern applications require frequent updates and changes, containers make it easier for developers to implement and distribute updates without disrupting services.&lt;/li>
+&lt;li>&lt;strong>Dev teams&lt;/strong> can efficiently share and update applications, while &lt;strong>Ops teams&lt;/strong> can maintain scalable and reliable deployments.&lt;/li>
+&lt;/ul>
+&lt;h3 id="pod">Pod
+&lt;/h3>&lt;p>&lt;em>The smallest deployable unit in Kubernetes&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>A pod encapsulates one or more tightly coupled containers.&lt;/li>
+&lt;li>Typically a pot hosts a single main application container, but it can include additional containers (sidecars) that assist the main application.&lt;/li>
+&lt;li>Containers in a same pod share:
+&lt;ul>
+&lt;li>Storage volumes&lt;/li>
+&lt;li>Lifecycle management
+&lt;ul>
+&lt;li>All containers in a pod start/stop/restart altogether, ensuring they function as a cohesive unit.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Network resources (same IP address / port space)
+&lt;ul>
+&lt;li>They communicate internally via localhost hostname with their designated ports.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="replicaset">ReplicaSet
+&lt;/h3>&lt;p>&lt;em>Ensures desired pod availability and redundancy&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>A ReplicaSet is responsible for maintaining a stable set of identical pods, using a template.&lt;/li>
+&lt;li>Maintains the desired number of pods running at all time, automatically replacing failed pods.&lt;/li>
+&lt;li>&lt;strong>Purpose&lt;/strong>: High Availability, redundancy, and scalability.&lt;/li>
+&lt;/ul>
+&lt;h3 id="deployment">Deployment
+&lt;/h3>&lt;p>&lt;em>Manages ReplicaSets and facilitates rolling updates&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Deployment is a higher-level abstraction that manages ReplicaSets&lt;/li>
+&lt;li>Helps automate the scaling and rollout process while minimizing manual intervention.&lt;/li>
+&lt;/ul>
+&lt;h3 id="services">Services
+&lt;/h3>&lt;p>&lt;em>Configuration for network and load balancing&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Kubernetes pods are ephemeral, they can be created / destroyed dynamically. This means their IP addresses are not assigned statically. Services provide a stable endpoint to resolve this issue for accessing pods.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Types of Services:&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Cluster IP (default type)
+&lt;ul>
+&lt;li>Exposes the service internally within the cluster.&lt;/li>
+&lt;li>Allows communication between pods in the same cluster.&lt;/li>
+&lt;li>Assigns an internal IP address and DNS name, unreachable from the external.&lt;/li>
+&lt;li>Service detects the correct pod based on the given &lt;strong>selector name&lt;/strong>
+Service: &lt;code>spec.selector.app&lt;/code> = Pod: &lt;code>metadata.labels.app&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>NodePort
+&lt;ul>
+&lt;li>Exposes the service on a static port on each node&amp;rsquo;s IP.&lt;/li>
+&lt;li>Enabling the service accessible from outside the cluster using &lt;NodeIP>:&lt;NodePort>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>LoadBalancer
+&lt;ul>
+&lt;li>Exposes the service externally via a cloud-based load balancer.&lt;/li>
+&lt;li>Suitable for production environments requiring public access and traffic distribution.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="summary">Summary
+&lt;/h3>&lt;p>This post covered Kubernetes&amp;rsquo; core building units: Containers, Pods, ReplicaSets, Deployments, and Services. These components work together to provide a scalable, resilient system for managing containerized applications.&lt;/p></description></item><item><title>Docker Basics</title><link>https://rose-jang.github.io/roselogs/p/docker-basics/</link><pubDate>Wed, 26 Feb 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/docker-basics/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/docker-basics/docker-banner.png" alt="Featured image of post Docker Basics" />&lt;p>I journaled about the basics of Docker in this post. Starting with a brief overview of what docker is and concept of containerization. I delve into how containerization differs from traditional software deployment methods and conclude with a walkthrough of creating docker images and containers.&lt;/p>
+&lt;h1 id="what-is-docker">What is Docker?
+&lt;/h1>&lt;p>&lt;strong>&lt;code>Docker&lt;/code>&lt;/strong> is an open-source containerization platform (PaaS) that enables users to package applications along with their required dependencies into lightweight, portable containers. It simplifies application deployment and execution, making it a popular choice for modern software delivery.&lt;/p>
+&lt;hr>
+&lt;h2 id="why-docker">Why Docker?
+&lt;/h2>&lt;h3 id="benefits">Benefits
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Efficiency&lt;/strong>
+Docker streamlines the deployment process with &lt;strong>pre-built images, reducing the complexity&lt;/strong> of setting up environments from scratch. Containers save time and resources by eliminating the need for running a full operating system for each application.&lt;/li>
+&lt;li>&lt;strong>Portability&lt;/strong>
+Docker&amp;rsquo;s Platform-agnostic containers provide consistent performance across various environments. Known for the resolution of &amp;ldquo;It works on my machine&amp;rdquo;, &lt;strong>containers can run anywhere, not just on a local machine&lt;/strong>.&lt;/li>
+&lt;/ul>
+&lt;h3 id="virtualization-vs-containerization">Virtualization VS Containerization
+&lt;/h3>&lt;p>Virtualization is a technique that enables the execution of an entire operating system on a physical host using a &lt;strong>hypervisor&lt;/strong>, such as &lt;code>Hyper-V&lt;/code> or &lt;code>VMware&lt;/code>. This allows multiple virtual machines to &lt;strong>run independently on its own resources&lt;/strong> while being able to intercommunicate with each other.&lt;/p>
+&lt;p>Containerization on the other hand, focuses on packaging applications with their dependencies into containers that &lt;strong>share the resources of the host system&lt;/strong>. Containers are more lightweight than VMs because they &lt;strong>don&amp;rsquo;t require a full OS to run&lt;/strong>. Instead, they run in isolated environments on the host operating system.&lt;/p>
+&lt;h1 id="core-concepts">Core Concepts
+&lt;/h1>&lt;h2 id="behind-the-scenes-how-docker-operates">Behind-the-Scenes: How Docker Operates
+&lt;/h2>&lt;p>Docker&amp;rsquo;s powerful functionality stems from its core framework, &lt;strong>Docker Engine&lt;/strong> that enables containerization. The combination of docker components allows Docker to pull base images from repositories, create containers, and manage them seamlessly.&lt;/p>
+&lt;h3 id="docker-engine-components">Docker Engine Components
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Docker Host&lt;/strong>: Where the host system provides hardware resources to support operations.&lt;/li>
+&lt;li>&lt;strong>Docker Daemon&lt;/strong> (&lt;code>dockerd&lt;/code>): Primary component that listens and processes user requests, and also responsible for managing images and containers.&lt;/li>
+&lt;li>&lt;strong>Docker CLI&lt;/strong>: The interface users interact for communicating with the Docker system conveniently. CLI interprets user commands into API requests for Docker Daemon.&lt;/li>
+&lt;li>&lt;strong>REST API&lt;/strong>: A stateless API enabling communication between the CLI and Docker Daemon to process and fulfill user requests.&lt;/li>
+&lt;/ul>
+&lt;h3 id="a-little-more-about-rest-api">A little more about REST API&amp;hellip;
+&lt;/h3>&lt;ul>
+&lt;li>REST API is used for session communication between the user and the Docker Daemon. The Docker Daemon listens for REST API requests via &lt;code>docker.sock&lt;/code> or over HTTP(S)/TCP protocols. Since REST APIs are stateless, they do not retain information about previous requests; each request is independent. This stateless nature works because the user includes all necessary information in each request to ensure it can be fulfilled without relying on prior context.&lt;/li>
+&lt;/ul>
+&lt;h3 id="docker-engine-workflow">Docker Engine Workflow
+&lt;/h3>&lt;ol>
+&lt;li>User initiates Docker (run via CLI or program).&lt;/li>
+&lt;li>Docker Daemon (dockerd) functions and listens for REST API requests via local socket or remote TCP socket.&lt;/li>
+&lt;li>User sends requests via CLI, which interprets the commands and forwards them as REST API requests to the Docker Daemon.&lt;/li>
+&lt;li>Docker Daemon processes the request and performs the desired action (e.g., creating a container, displays running containers).&lt;/li>
+&lt;li>User can then interact with Docker resources and experience the Docker system.&lt;/li>
+&lt;/ol>
+&lt;h3 id="cross-platform-operation">Cross-Platform Operation
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Docker Desktop&lt;/strong>: Enables to run Linux based Docker system on Windows or macOS without additional emulation features.&lt;/li>
+&lt;li>&lt;strong>WSL Integration&lt;/strong>: Integrating Docker Desktop with the &lt;code>WSL (Windows Subsystem for Linux)&lt;/code> optimizes performances providing a native-like Linux environment for Windows users.&lt;/li>
+&lt;/ul>
+&lt;h2 id="try-dockerfile">Try Dockerfile
+&lt;/h2>&lt;ol>
+&lt;li>Start with &lt;strong>base images&lt;/strong> available online such as &lt;code>Docker Hub&lt;/code>&lt;/li>
+&lt;li>Create &lt;strong>custom images&lt;/strong> by writing a &lt;code>Dockerfile&lt;/code> script&lt;/li>
+&lt;li>The custom images are used to create &amp;amp; run containers&lt;/li>
+&lt;li>Containers operate in an isolated environment
+&lt;ul>
+&lt;li>Runs separately from the host system&lt;/li>
+&lt;li>Still relies on the host&amp;rsquo;s resources (CPU, memory, storage, &amp;hellip;)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="image">Image
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Image&lt;/strong> is a static template used to create a container, which is editable and usable multiple times.&lt;/li>
+&lt;li>Edit &lt;code>Dockerfike&lt;/code> if any updates needed for applications, very convenient &amp;amp; efficient way for development and deployment.&lt;/li>
+&lt;/ul>
+&lt;h3 id="container---port">Container - Port
+&lt;/h3>&lt;p>When running a container, you get to configure port numbers. There are 2 port numbers which are used on host and container respectively.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;code>-p host-port:container-port&lt;/code>&lt;/p>&lt;/blockquote>
+&lt;ul>
+&lt;li>&lt;code>host-port&lt;/code> is opened externally for incoming traffics.&lt;/li>
+&lt;li>&lt;code>container-port&lt;/code> is at the door of containers listening to connections.&lt;/li>
+&lt;li>Basically they map each other as you configured at container build.&lt;/li>
+&lt;/ul>
+&lt;h3 id="create-a-dockerfile">Create a Dockerfile
+&lt;/h3>&lt;ol>
+&lt;li>Specify and provide requirements in a &lt;code>Dockerfile&lt;/code>
+&lt;ul>
+&lt;li>Define a desired base image&lt;/li>
+&lt;li>Write required configurations, dependencies, or libraries&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> image:tag&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> apt-get update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> apt-get install -y nginx&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">COPY&lt;/span> ./webServer&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> ./web.sh&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">CMD&lt;/span> ./conf.sh&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>Run the &lt;code>Dockerfile&lt;/code> to create a container
+&lt;code>docker -t image:tag directoryOfDockerfile&lt;/code>
+&lt;code>docker -t webApp:first .&lt;/code>
+-&amp;gt; then Docker installs the listed dependencies or packages&lt;/li>
+&lt;li>Run the container
+&lt;code>docker run -p 5000:443 --name myContainer webApp:first&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h3 id="dockerfile---best-practice">Dockerfile - Best practice
+&lt;/h3>&lt;ol>
+&lt;li>Minimize image size
+&lt;ul>
+&lt;li>Use base images with the minimalist &lt;code>alpine&lt;/code> Linux distribution&lt;/li>
+&lt;li>Install without cache using the flag &lt;code>--no-cache-dir&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Keep the script clean
+&lt;ul>
+&lt;li>List a required dependencies in a file (.txt)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> python:3.10-alpine&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">WORKDIR&lt;/span>&lt;span class="s"> /kube-WebApp&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">COPY&lt;/span> requirements.txt /kube-WebApp&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> pip install -r dependencies.txt --no-cache-dir&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">COPY&lt;/span> . /kube-WebApp&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">CMD&lt;/span> python app.py&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item></channel></rss>

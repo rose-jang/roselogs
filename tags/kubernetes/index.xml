@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kubernetes on Rose Jang</title><link>https://rose-jang.github.io/roselogs/tags/kubernetes/</link><description>Recent content in Kubernetes on Rose Jang</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 27 Mar 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://rose-jang.github.io/roselogs/tags/kubernetes/index.xml" rel="self" type="application/rss+xml"/><item><title>Kubernetes Basics</title><link>https://rose-jang.github.io/roselogs/p/kubernetes-basics/</link><pubDate>Thu, 27 Mar 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/kubernetes-basics/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/kubernetes-basics/k8s-banner.png" alt="Featured image of post Kubernetes Basics" />&lt;h1 id="what-is-kubernetes">What is Kubernetes?
+&lt;/h1>&lt;p>&lt;strong>Kubernetes&lt;/strong> is an open-source platform designed to manage containerized applications at scale. It automates the deployment, scaling, and management of application containers across clusters of machines.&lt;/p>
+&lt;p>Kubernetes is capable of running thousands of replicas of an application simultaneously, ensuring high availability and reliability. Each replica (an instance of an application) can be accompanied by additional containers, such as &lt;strong>sidecars&lt;/strong>, which serve as &amp;ldquo;managers&amp;rdquo; performing essential tasks such as logging, proxying, or monitoring.&lt;/p>
+&lt;p>A key concept in Kubernetes is the shared lifecycle of containers within a pod, ensuring that all components of the application work together seamlessly. This design simplifies the deployment and management of applications, especially in large-scale environments where consistency and reliability are paramount.&lt;/p>
+&lt;hr>
+&lt;h2 id="fundamental-components">Fundamental Components
+&lt;/h2>&lt;h3 id="containers">Containers
+&lt;/h3>&lt;p>&lt;em>Packaging all dependencies, code, and runtime of exact versions&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Containers ensures smooth operation across both development and production environments.&lt;/li>
+&lt;li>Since modern applications require frequent updates and changes, containers make it easier for developers to implement and distribute updates without disrupting services.&lt;/li>
+&lt;li>&lt;strong>Dev teams&lt;/strong> can efficiently share and update applications, while &lt;strong>Ops teams&lt;/strong> can maintain scalable and reliable deployments.&lt;/li>
+&lt;/ul>
+&lt;h3 id="pod">Pod
+&lt;/h3>&lt;p>&lt;em>The smallest deployable unit in Kubernetes&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>A pod encapsulates one or more tightly coupled containers.&lt;/li>
+&lt;li>Typically a pot hosts a single main application container, but it can include additional containers (sidecars) that assist the main application.&lt;/li>
+&lt;li>Containers in a same pod share:
+&lt;ul>
+&lt;li>Storage volumes&lt;/li>
+&lt;li>Lifecycle management
+&lt;ul>
+&lt;li>All containers in a pod start/stop/restart altogether, ensuring they function as a cohesive unit.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Network resources (same IP address / port space)
+&lt;ul>
+&lt;li>They communicate internally via localhost hostname with their designated ports.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="replicaset">ReplicaSet
+&lt;/h3>&lt;p>&lt;em>Ensures desired pod availability and redundancy&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>A ReplicaSet is responsible for maintaining a stable set of identical pods, using a template.&lt;/li>
+&lt;li>Maintains the desired number of pods running at all time, automatically replacing failed pods.&lt;/li>
+&lt;li>&lt;strong>Purpose&lt;/strong>: High Availability, redundancy, and scalability.&lt;/li>
+&lt;/ul>
+&lt;h3 id="deployment">Deployment
+&lt;/h3>&lt;p>&lt;em>Manages ReplicaSets and facilitates rolling updates&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Deployment is a higher-level abstraction that manages ReplicaSets&lt;/li>
+&lt;li>Helps automate the scaling and rollout process while minimizing manual intervention.&lt;/li>
+&lt;/ul>
+&lt;h3 id="services">Services
+&lt;/h3>&lt;p>&lt;em>Configuration for network and load balancing&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Kubernetes pods are ephemeral, they can be created / destroyed dynamically. This means their IP addresses are not assigned statically. Services provide a stable endpoint to resolve this issue for accessing pods.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Types of Services:&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Cluster IP (default type)
+&lt;ul>
+&lt;li>Exposes the service internally within the cluster.&lt;/li>
+&lt;li>Allows communication between pods in the same cluster.&lt;/li>
+&lt;li>Assigns an internal IP address and DNS name, unreachable from the external.&lt;/li>
+&lt;li>Service detects the correct pod based on the given &lt;strong>selector name&lt;/strong>
+Service: &lt;code>spec.selector.app&lt;/code> = Pod: &lt;code>metadata.labels.app&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>NodePort
+&lt;ul>
+&lt;li>Exposes the service on a static port on each node&amp;rsquo;s IP.&lt;/li>
+&lt;li>Enabling the service accessible from outside the cluster using &lt;NodeIP>:&lt;NodePort>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>LoadBalancer
+&lt;ul>
+&lt;li>Exposes the service externally via a cloud-based load balancer.&lt;/li>
+&lt;li>Suitable for production environments requiring public access and traffic distribution.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="summary">Summary
+&lt;/h3>&lt;p>This post covered Kubernetes&amp;rsquo; core building units: Containers, Pods, ReplicaSets, Deployments, and Services. These components work together to provide a scalable, resilient system for managing containerized applications.&lt;/p></description></item></channel></rss>

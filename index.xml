@@ -1,0 +1,1057 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Rose Jang</title><link>https://rose-jang.github.io/roselogs/</link><description>Recent content on Rose Jang</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 08 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://rose-jang.github.io/roselogs/index.xml" rel="self" type="application/rss+xml"/><item><title>SOC Environment Home Lab - Setting Up</title><link>https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/</link><pubDate>Sun, 08 Jun 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/socHomeLab-banner.png" alt="Featured image of post SOC Environment Home Lab - Setting Up" />&lt;h1 id="introduction">Introduction
+&lt;/h1>&lt;p>This project simulates a simplified Security Operations Centre (SOC) environment within a small enterprise network. It uses open-source tools including &lt;strong>Wazuh&lt;/strong>, &lt;strong>Snort&lt;/strong>, and &lt;strong>Sysmon&lt;/strong> — to demonstrate how cyberattacks can be detected and monitored in real-time.&lt;/p>
+&lt;p>In this post, it focuses on setting up the internal network and essential security tools. Real-world attack scenarios will be excecuted to observe how the SOC components respond in the next post.&lt;/p>
+&lt;p>By emulating a realistic attack-and-defense scenario, this project aims to deepen understanding of SOC operations and network security monitoring.&lt;/p>
+&lt;h1 id="scenario-overview">Scenario Overview
+&lt;/h1>&lt;p>The SOC home lab consists of &lt;strong>three virtual machines&lt;/strong> running on &lt;strong>VirtualBox&lt;/strong>, each serving a different role:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Victim&lt;/strong>: A &lt;strong>Windows&lt;/strong> machine with &lt;strong>Sysmon&lt;/strong> and the &lt;strong>Wazuh&lt;/strong> agent installed to log and send system activity data.&lt;/li>
+&lt;li>&lt;strong>SOC Server&lt;/strong>: An &lt;strong>Ubuntu&lt;/strong> machine running &lt;strong>Wazuh&lt;/strong> (as the SIEM) and &lt;strong>Snort&lt;/strong> (as the IDS) to collect, analyze, and alert on suspicious behaviour.&lt;/li>
+&lt;li>&lt;strong>Attacker&lt;/strong>: A &lt;strong>Kali&lt;/strong> Linux machine used to simulate offensive actions, including port scanning and credential dumping using tools like &lt;strong>Nmap&lt;/strong> and &lt;strong>Mimikatz&lt;/strong>.&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>This setup assumes that the attacker already has gained access to the internal network. This reflects post-compromise behaviour for realistic threat emulation.&lt;/p>&lt;/blockquote>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/diagram.png"
+width="1495"
+height="943"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/diagram_hu_9424cd89fdf30edf.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/diagram_hu_6bb79cbaeee8c0ec.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="158"
+data-flex-basis="380px"
+>&lt;/p>
+&lt;hr>
+&lt;h1 id="environment-setup">Environment Setup
+&lt;/h1>&lt;h2 id="network-configuration">Network configuration
+&lt;/h2>&lt;p>All virtual machines in this lab are connected using a &lt;strong>Host-only network adapter&lt;/strong> to ensure isolation from the internet, allowing safe and controlled testing. Each machine is configured with a &lt;strong>static IP address&lt;/strong> to simplify traffic analysis and eliminate ambiguity during monitoring.&lt;/p>
+&lt;p>&lt;strong>Static IP assignments&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Ubuntu (SOC Server): &lt;code>192.168.56.10&lt;/code>&lt;/li>
+&lt;li>Windows (Victim): &lt;code>192.168.56.20&lt;/code>&lt;/li>
+&lt;li>Kali (Attacker): &lt;code>192.168.56.30&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="tooling--configuration">Tooling &amp;amp; Configuration
+&lt;/h2>&lt;h2 id="ubuntu---soc-server">Ubuntu - SOC Server
+&lt;/h2>&lt;h3 id="siem-wazuh">SIEM: Wazuh
+&lt;/h3>&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Install &lt;strong>Wazuh&lt;/strong> &lt;strong>All-in-One&lt;/strong> package (from &lt;a class="link" href="https://documentation.wazuh.com/current/quickstart.html" target="_blank" rel="noopener"
+>&lt;strong>Wazuh Quickstart&lt;/strong>&lt;/a>), which includes:
+&lt;ul>
+&lt;li>Wazuh Manager&lt;/li>
+&lt;li>Filebeat&lt;/li>
+&lt;li>Elasticsearch&lt;/li>
+&lt;li>Kibana&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Verify server dashboard access:
+&lt;ul>
+&lt;li>Server IP: 192.168.56.10, Port 5601&lt;/li>
+&lt;li>URL: &lt;code>http://[serverIP]:5601&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>Agent Deployment&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Add an agent from Wazuh dashboard&lt;/li>
+&lt;li>Troubleshooting for agent deployment on dashboard
+a. Run the agent manager in CLI:
+&lt;code>sudo /var/ossec/bin/manage_agents&lt;/code>
+b. Follow prompts to create an agent
+c. Extract the authentication key of the agent
+d. Enter the key into the Wazuh Agent software on Windows machine
+e. Restart both the agent and server&lt;/li>
+&lt;li>Confirm the Windows machine appears in the dashboard&lt;/li>
+&lt;/ol>
+&lt;h3 id="idsipd-snort">IDS/IPD: Snort
+&lt;/h3>&lt;p>&lt;strong>Quick Note: Difference between IDS/IPS?&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>IDS (Intrusion Detection System) alerts on suspicious activities based on defined rules.&lt;/li>
+&lt;li>IPS (Intrusion Prevention System) acts a step further by actively responding to malicious traffics.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Install in CLI:
+&lt;code>sudo apt-get install snort -y&lt;/code>&lt;/li>
+&lt;li>Define the network range to monitor during installation (e.g., 192.168.56.0/24)&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-installation.png"
+width="1414"
+height="679"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-installation_hu_a027300c10e4ebb.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-installation_hu_558f4e686b4519b2.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="208"
+data-flex-basis="499px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>Test Snort:
+&lt;code>sudo snort -v&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-test.png"
+width="1721"
+height="1196"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-test_hu_34398e3942150f07.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/snort-test_hu_a7c0c5207800a84b.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="143"
+data-flex-basis="345px"
+>&lt;/p>
+&lt;p>&lt;strong>Configuration&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Snort file path&lt;/strong>
+&lt;ul>
+&lt;li>Configs: &lt;strong>/etc/snort&lt;/strong>&lt;/li>
+&lt;li>Logs: &lt;strong>/var/log/snort&lt;/strong>&lt;/li>
+&lt;li>Rules: &lt;strong>/etc/snort/rules&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;ol>
+&lt;li>Rule configuration&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Add rules into the file &amp;gt; &lt;code>/etc/snort/rules/local.rules&lt;/code>&lt;/li>
+&lt;li>Alert rule configuration structure:
+&lt;ul>
+&lt;li>Header - Body - Actions&lt;/li>
+&lt;li>alert [protocol] [source] [port] → [destination] [port] (body… msg:”~~detected”;)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Detect open port scanning&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">alert tcp any any -&amp;gt; &lt;span class="nv">$HOME_NET&lt;/span> 1:1024 &lt;span class="o">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> flags: S&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> msg: &lt;span class="s2">&amp;#34;PORT SCAN detected&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> threshold: &lt;span class="nb">type&lt;/span> both, track by_src, count 10, seconds 3&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sid: 1001&lt;span class="p">;&lt;/span> rev: 1&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Detect Mimikatz&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">alert tcp any any -&amp;gt; &lt;span class="nv">$HOME_NET&lt;/span> any &lt;span class="o">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> msg: &lt;span class="s2">&amp;#34;Mimikatz detected&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> content: &lt;span class="s2">&amp;#34;mimikatz&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> nocase&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sed: 1002&lt;span class="p">;&lt;/span> rev: 1&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>Detect open port scanning
+&lt;ul>
+&lt;li>&lt;code>flags: S;&lt;/code> # Flags for TCP &lt;strong>SYN&lt;/strong>&lt;/li>
+&lt;li>&lt;code>threshold:&lt;/code> # Triggers when 10 SYN packets in 3 seconds&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Detect Mimikatz
+&lt;ul>
+&lt;li>&lt;code>content:&lt;/code> # Detects a string “mimikatz”, case insensitive&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="windows---victim">Windows - Victim
+&lt;/h2>&lt;h3 id="sysmon-activity-logging">Sysmon: Activity logging
+&lt;/h3>&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Download Sysmon file on &lt;a class="link" href="https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon" target="_blank" rel="noopener"
+>Microsoft official site&lt;/a>&lt;/li>
+&lt;li>Use the configuration file &lt;a class="link" href="https://wazuh.com/resources/blog/emulation-of-attack-techniques-and-detection-with-wazuh/sysmonconfig.xml" target="_blank" rel="noopener"
+>provided by Wazuh&lt;/a> (save as XML file)&lt;/li>
+&lt;li>Install via PowerShell:
+&lt;code>./sysmon64.exe -i sysconfig.xml&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h3 id="wazuh-agent">Wazuh Agent
+&lt;/h3>&lt;p>&lt;strong>Installation&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Install by using command retrieved from Wazuh dashboard&lt;/li>
+&lt;li>Or insert authentication key from Agent management
+&amp;gt; Refer to the &lt;strong>Agent deployment&lt;/strong> in &lt;strong>SIEM: Wazuh&lt;/strong> section above
+&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-agent.png"
+width="712"
+height="654"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-agent_hu_777174e2e1e7031f.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-agent_hu_a9a083e5c1021554.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="108"
+data-flex-basis="261px"
+>&lt;/li>
+&lt;li>Confirm logs and events appearing on the Wazuh dashboard
+&lt;img src="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-dashboard.png"
+width="896"
+height="148"
+srcset="https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-dashboard_hu_938f4157528d4acb.png 480w, https://rose-jang.github.io/roselogs/p/soc-environment-home-lab-setting-up/wazuh-dashboard_hu_9f2dd868196d024f.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="605"
+data-flex-basis="1452px"
+>&lt;/li>
+&lt;/ol>
+&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>This post covered the setup of a simplified SOC lab using tools such as Wazuh, Snort, and Sysmon across isolated virtual machines. By isolating the network and configuring static IPs, we created a controlled space for observing attacker behaviors and system responses. With all components successfully deployed and communicating, the foundation is now ready for simulating and detecting real-world cyberattacks.&lt;/p>
+&lt;p>The simulation using penetration tools on Kali will be demonstrated in the next blog post.&lt;/p></description></item><item><title>Understanding the Cyber Kill Chain</title><link>https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/</link><pubDate>Fri, 16 May 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/understanding-the-cyber-kill-chain/cyberkillchain-banner.png" alt="Featured image of post Understanding the Cyber Kill Chain" />&lt;h1 id="cyber-kill-chain">Cyber Kill Chain
+&lt;/h1>&lt;p>To effectively defend a network, we must learn to think like an attacker. By understanding how cyber attacks unfold, we can proactively secure our systems and prevent damage before it happens. One of the key steps in that process is learning the &lt;strong>Cyber Kill Chain&lt;/strong>.&lt;/p>
+&lt;h2 id="what-is-it">What is it?
+&lt;/h2>&lt;p>The &lt;strong>Cyber Kill Chain&lt;/strong> is a foundational framework in cybersecurity that outlines the typical stages of a cyber attack—from initial planning to achieving the attacker’s end goal. Developed by Lockheed Martin, this model helps security teams understand the attack lifecycle in depth. By identifying and interrupting attacks at various stages, defenders can significantly reduce the likelihood of a successful breach.&lt;/p>
+&lt;h2 id="7-stages">7 Stages
+&lt;/h2>&lt;h3 id="1-reconnaissance">1-Reconnaissance
+&lt;/h3>&lt;p>Planning phase, attackers gather information about their target&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Passive&lt;/strong>: Collect data without direct interaction (&lt;em>e.g., archived websites, social media, public records&lt;/em>)&lt;/li>
+&lt;li>&lt;strong>Active&lt;/strong>: Direct engagement (&lt;em>e.g., scanning ports, pining servers&lt;/em>**)**&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;p>&lt;strong>Defender’s role&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Avoid publicly exposed information&lt;/li>
+&lt;li>Patch known vulnerability in an early stage&lt;/li>
+&lt;li>Monitor suspicious network activity (scanning or probing)&lt;/li>
+&lt;/ul>
+&lt;h3 id="2-weaponization">2-Weaponization
+&lt;/h3>&lt;p>Prepare a payload (bundle of malicious codes) to exploit using the information collected&lt;/p>
+&lt;p>&lt;strong>Defender’s role&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Use the latest threat intelligence&lt;/li>
+&lt;li>Configure detection rules for common exploits&lt;/li>
+&lt;/ul>
+&lt;h3 id="3-delivery">3-Delivery
+&lt;/h3>&lt;p>Expose the payload to lure victims (vis phishing emails, malicious websites/attachments, USBs, …)&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>Test suspicious files in sandbox&lt;/li>
+&lt;li>Educate users on phishing attacks&lt;/li>
+&lt;li>Monitor for unusual behaviour&lt;/li>
+&lt;/ul>
+&lt;h3 id="4-exploitation">4-Exploitation
+&lt;/h3>&lt;p>Payload executed once vulnerability is triggered&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>User training to avoid clicking suspicious links/files&lt;/li>
+&lt;li>EDR (Endpoint Detection &amp;amp; Response) monitoring&lt;/li>
+&lt;li>Continuous monitoring for unusual behaviour&lt;/li>
+&lt;/ul>
+&lt;h3 id="5-installation">5-Installation
+&lt;/h3>&lt;p>Malware installation (backdoor, web shell) on the compromised system&lt;/p>
+&lt;p>Defender’s role:&lt;/p>
+&lt;ul>
+&lt;li>Monitor OS settings change&lt;/li>
+&lt;li>Block unauthorized system tasks or services&lt;/li>
+&lt;li>Threat hunting to detect uncommon installation&lt;/li>
+&lt;/ul>
+&lt;h3 id="6-commandcontrol-c2">6-Command&amp;amp;Control (C2)
+&lt;/h3>&lt;p>The malware contacts a remote server that manipulates the infected machine&lt;/p>
+&lt;p>&lt;strong>Defender’s role:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Analyze outbound traffic&lt;/li>
+&lt;li>Block known malicious IPs/domains&lt;/li>
+&lt;li>Isolate infected systems&lt;/li>
+&lt;/ul>
+&lt;h3 id="7-actions-on-objectives">7-Actions on Objectives
+&lt;/h3>&lt;p>Accomplish initial goals by stealing data, damage systems, or ransomware, …&lt;/p>
+&lt;p>&lt;strong>Defender’s role:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Restrict network access from external&lt;/li>
+&lt;li>Implement DLP to prevent data leakage&lt;/li>
+&lt;li>Lock down sensitive resources&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>We explored the stages of the Cyber Kill Chain that offers valuable insight into how attackers operate, and how defenders respond at each phase. Understanding this model is a crucial step toward building a proactive and effective cybersecurity strategy.&lt;/p></description></item><item><title>Web App hosting on AWS S3</title><link>https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/</link><pubDate>Fri, 04 Apr 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cloud-banner.png" alt="Featured image of post Web App hosting on AWS S3" />&lt;h1 id="project-overview">Project Overview
+&lt;/h1>&lt;p>In this project, I built a simple &lt;strong>note-taking web app&lt;/strong> that features a clean and minimalistic design, providing a user-friendly interface for taking quick notes. To make the app accessible to users on the web, I hosted it using AWS (Amazon Web Services), specifically using &lt;strong>Amazon S3 for static website hosting&lt;/strong> and &lt;strong>Route 53 for domain management&lt;/strong>. By deploying the app on AWS, we can ensure that it is scalable, secure, and easily accessible.&lt;/p>
+&lt;ul>
+&lt;li>&lt;em>Prerequisites&lt;/em>
+&lt;ol>
+&lt;li>AWS account (preferably &lt;strong>IAM admin user&lt;/strong>)&lt;/li>
+&lt;li>Static website files&lt;/li>
+&lt;li>Domain name&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="used-aws-services">Used AWS Services
+&lt;/h1>&lt;p>To maximize the functionality of the web application, several AWS services were utilized in this project. These services enhance security, availability, and user accessibility on the front end while ensuring efficient management and cost-effectiveness on the back end.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>S3&lt;/strong> (Simple Storage Service)&lt;/li>
+&lt;li>&lt;strong>Route 53&lt;/strong> (for Domain Name Service)&lt;/li>
+&lt;li>&lt;strong>CloudFront&lt;/strong> (as Content Network Delivery)&lt;/li>
+&lt;li>&lt;strong>AWS Certificate Manager&lt;/strong> (to activate HTTPS)&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="content-management-on-s3">Content management on &lt;strong>S3&lt;/strong>
+&lt;/h2>&lt;p>Amazon &lt;strong>S3 (Simple Storage Service)&lt;/strong> is a highly scalable object storage service that allows us to store and manage virtually unlimited amounts of data. It is particularly useful for hosting static websites, including HTML, CSS, JS, images, and other files.&lt;/p>
+&lt;h3 id="setting-up-bucket">Setting Up Bucket
+&lt;/h3>&lt;ol>
+&lt;li>Create a bucket
+&lt;ul>
+&lt;li>Create a general bucket with a globally unique name&lt;/li>
+&lt;li>Leave other settings as default&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_bucket.png"
+width="1792"
+height="950"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_bucket_hu_286e39940665f80e.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_bucket_hu_1e7c615005382025.png 1024w"
+loading="lazy"
+alt="Create a bucket"
+class="gallery-image"
+data-flex-grow="188"
+data-flex-basis="452px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>Upload files
+&lt;ul>
+&lt;li>After the bucket is created, simply drag &amp;amp; drop files into the bucket&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/upload_objects.png"
+width="2838"
+height="964"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/upload_objects_hu_87b0a75a3b92d804.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/upload_objects_hu_59ba7c5e793050cc.png 1024w"
+loading="lazy"
+alt="Upload object"
+class="gallery-image"
+data-flex-grow="294"
+data-flex-basis="706px"
+>&lt;/p>
+&lt;h3 id="configuration">Configuration
+&lt;/h3>&lt;p>After uploading the website files, we need to configure the bucket for static website hosting.&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_configure.png"
+width="1602"
+height="1196"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_configure_hu_3d3335b099782e36.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_configure_hu_999c205d90fb5b0.png 1024w"
+loading="lazy"
+alt="Bucket configuration"
+class="gallery-image"
+data-flex-grow="133"
+data-flex-basis="321px"
+>&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>Properties&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Enable &lt;strong>Static website hosting&lt;/strong>
+&lt;ul>
+&lt;li>Hosting type: &lt;strong>Static website&lt;/strong>&lt;/li>
+&lt;li>Index document: &lt;strong>index.html&lt;/strong> (landing page)&lt;/li>
+&lt;li>Keep other settings as default&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_static.png"
+width="2728"
+height="1310"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_static_hu_da274f274475bdfd.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_static_hu_d113b63afc9c5d53.png 1024w"
+loading="lazy"
+alt="Bucket Properties"
+class="gallery-image"
+data-flex-grow="208"
+data-flex-basis="499px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>&lt;strong>Permissions&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Turn off &lt;strong>Block all public access&lt;/strong>, which will allow the bucket to be publicly accessible&lt;/li>
+&lt;li>Edit &lt;strong>Bucket policy&lt;/strong> as below, in &lt;strong>JSON&lt;/strong> format (&lt;em>Use your bucket ARN as &lt;strong>Resource&lt;/strong>&lt;/em>)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-json" data-lang="json">&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Version&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;2012-10-17&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Statement&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Sid&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;PublicReadGetObject&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Effect&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;Allow&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Principal&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;*&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Action&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;s3:GetObject&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;Resource&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;arn:aws:s3:::note.rosespace.me/*&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="3">
+&lt;li>Verify &lt;strong>Accessibility&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>In &lt;strong>Properties&lt;/strong>, scroll down to the &lt;strong>Bucket website endpoint&lt;/strong>&lt;/li>
+&lt;li>The endpoint displays the bucket objects as a static website&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_endpoint.png"
+width="1666"
+height="602"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_endpoint_hu_15d362ce8292f10a.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/bucket_endpoint_hu_7f3f4ee0a136ddd4.png 1024w"
+loading="lazy"
+alt="Bucket endpoint"
+class="gallery-image"
+data-flex-grow="276"
+data-flex-basis="664px"
+>&lt;/p>
+&lt;hr>
+&lt;h2 id="domain-name-setup-with-route-53">Domain name setup with &lt;strong>Route 53&lt;/strong>
+&lt;/h2>&lt;p>Now that the website is hosted on S3, we can set up a custom domain using &lt;strong>AWS Route 53&lt;/strong> to make the site more user-friendly and accessible.&lt;/p>
+&lt;h3 id="create-a-dns-record">Create a DNS Record
+&lt;/h3>&lt;ol>
+&lt;li>Access to &lt;strong>Route 53&lt;/strong>, and select your domain&lt;/li>
+&lt;li>Under &lt;strong>Records&lt;/strong>, click &lt;strong>Create record&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_53.png"
+width="2089"
+height="1334"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_53_hu_3c21253ce549fdc.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/create_53_hu_1d730f5b416de6e8.png 1024w"
+loading="lazy"
+alt="Create a new record"
+class="gallery-image"
+data-flex-grow="156"
+data-flex-basis="375px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>Configure the &lt;strong>CNAME&lt;/strong> record (subdomain)
+&lt;ul>
+&lt;li>Record name: &lt;strong>Name the website&lt;/strong> as you want&lt;/li>
+&lt;li>Record type: &lt;strong>CNAME&lt;/strong> (Canonical Name)&lt;/li>
+&lt;li>Value: Enter the &lt;strong>website endpoint&lt;/strong> retrieved from the bucket&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/53_endpoint.png"
+width="2704"
+height="932"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/53_endpoint_hu_51e777dac03e4205.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/53_endpoint_hu_721d83b2e228ac43.png 1024w"
+loading="lazy"
+alt="CNAME Record"
+class="gallery-image"
+data-flex-grow="290"
+data-flex-basis="696px"
+>&lt;/p>
+&lt;ol start="4">
+&lt;li>&lt;strong>Check Accessibility&lt;/strong>
+&lt;ul>
+&lt;li>Once the DNS record is created, try accessing the domain&lt;/li>
+&lt;li>If everything is configured correctly, the website should be up and running without issues&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/web-hosting.png"
+width="1314"
+height="972"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/web-hosting_hu_d75b240a79a00dc1.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/web-hosting_hu_7ff2ddcb21366ecd.png 1024w"
+loading="lazy"
+alt="Website accessibility"
+class="gallery-image"
+data-flex-grow="135"
+data-flex-basis="324px"
+>&lt;/p>
+&lt;hr>
+&lt;h2 id="cloutfront">&lt;strong>CloutFront&lt;/strong>
+&lt;/h2>&lt;p>To further enhance the speed, security, and global accessibility of the website, let&amp;rsquo;s deploy a &lt;strong>CloudFront&lt;/strong> distribution and issue a a public SSL/TLS certifiacate via &lt;strong>ACM, AWS Certificate Manager&lt;/strong>.&lt;/p>
+&lt;h3 id="initialize-cloudfront-distribution">Initialize CloudFront Distribution
+&lt;/h3>&lt;ol>
+&lt;li>Create a distribution
+&lt;ul>
+&lt;li>Navigate to &lt;strong>CloudFront&lt;/strong> and create a new &lt;strong>distribution&lt;/strong>&lt;/li>
+&lt;li>Choose the &lt;strong>S3 bucket&lt;/strong> (static website endpoint) as the origin domain&lt;/li>
+&lt;li>Ensure the &lt;strong>bucket name&lt;/strong> and &lt;strong>custom domain name&lt;/strong> match for routing&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_create.png"
+width="1538"
+height="1020"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_create_hu_1b11f7a28e2dc5f2.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_create_hu_3f90682a040f2037.png 1024w"
+loading="lazy"
+alt="CF Distribution"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="361px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>Distribution configuration
+&lt;ul>
+&lt;li>Configure further for proper access&lt;/li>
+&lt;li>Viewer: Redirect &lt;strong>HTTP to HTTPS&lt;/strong>&lt;/li>
+&lt;li>Price class: Select desired &lt;strong>regions&lt;/strong>&lt;/li>
+&lt;li>Alternate domain name: Add the &lt;strong>domain name&lt;/strong> configured previously&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_configure.png"
+width="1706"
+height="372"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_configure_hu_96bd225d11949fe3.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_configure_hu_b7b027e326ad0e3c.png 1024w"
+loading="lazy"
+alt="CF Configuration"
+class="gallery-image"
+data-flex-grow="458"
+data-flex-basis="1100px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>Request a certificate
+&lt;ul>
+&lt;li>If you don&amp;rsquo;t have one yet, request a new public certificate&lt;/li>
+&lt;li>Fully qualified domain name: Enter the &lt;strong>FQDN&lt;/strong>&lt;/li>
+&lt;li>Validation method: &lt;strong>DNS validation&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert1.png"
+width="1216"
+height="324"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert1_hu_cef6f1e4e6ed3b7f.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert1_hu_d6a216b0b10e45f0.png 1024w"
+loading="lazy"
+alt="Request certificate"
+class="gallery-image"
+data-flex-grow="375"
+data-flex-basis="900px"
+>
+&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert2.png"
+width="1150"
+height="918"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert2_hu_5f69615b5fe6710.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cf_cert2_hu_2f5c0242295524a1.png 1024w"
+loading="lazy"
+alt="Certificate"
+class="gallery-image"
+data-flex-grow="125"
+data-flex-basis="300px"
+>&lt;/p>
+&lt;pre>&lt;code>- Confirm the certificate status and return to the distribution setup
+- Select the new certificate from the list
+- Complete the distribution creation process
+&lt;/code>&lt;/pre>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_status.png"
+width="1028"
+height="716"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_status_hu_b1b3c487847a6942.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_status_hu_7083b320d88f9f80.png 1024w"
+loading="lazy"
+alt="Certificate status"
+class="gallery-image"
+data-flex-grow="143"
+data-flex-basis="344px"
+>
+&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_select.png"
+width="1148"
+height="266"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_select_hu_29264943acadac75.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cert_select_hu_6785bedd7c762297.png 1024w"
+loading="lazy"
+alt="Select certificate"
+class="gallery-image"
+data-flex-grow="431"
+data-flex-basis="1035px"
+>&lt;/p>
+&lt;ol start="4">
+&lt;li>Edit Route 53 CNAME record
+Once the distrubution is deployed and enabled:
+&lt;ul>
+&lt;li>Go to &lt;strong>Route 53&lt;/strong> and edit the existing &lt;strong>CNAME&lt;/strong> record&lt;/li>
+&lt;li>Replace the value with the distribution domain name&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cname_change.png"
+width="782"
+height="832"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cname_change_hu_bfc6c01efe5882f.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/cname_change_hu_6795f80e88a676f3.png 1024w"
+loading="lazy"
+alt="CNAME change"
+class="gallery-image"
+data-flex-grow="93"
+data-flex-basis="225px"
+>&lt;/p>
+&lt;ol start="5">
+&lt;li>Verify Website Accessibility
+If everything is configured correctly and running, you can now access the secure website.
+The website is now:
+&lt;ul>
+&lt;li>Globally distributed via &lt;strong>CloudFront&lt;/strong>&lt;/li>
+&lt;li>Securely accessible with &lt;strong>HTTPS&lt;/strong> via the ACM-issued cerficicate&lt;/li>
+&lt;li>Properly routed through the custom domain name&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/final.png"
+width="1140"
+height="822"
+srcset="https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/final_hu_ec176af26488d888.png 480w, https://rose-jang.github.io/roselogs/p/web-app-hosting-on-aws-s3/final_hu_9c030b7aa680e136.png 1024w"
+loading="lazy"
+alt="Final website"
+class="gallery-image"
+data-flex-grow="138"
+data-flex-basis="332px"
+>&lt;/p>
+&lt;hr>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>By integrating AWS S3, Route 53, CloudFront, and ACM, we successfully hosted a static web application with a robust and modern infrastructure. The website is not only highly available and securely accessible via HTTPS, but also globally distributed with low latency and reachable through a custom domain. This setup ensures a smooth and reliable user experience while taking full advantage of AWS’s scalability, performance, and cost-effectiveness.&lt;/p></description></item><item><title>Kubernetes Basics</title><link>https://rose-jang.github.io/roselogs/p/kubernetes-basics/</link><pubDate>Thu, 27 Mar 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/kubernetes-basics/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/kubernetes-basics/k8s-banner.png" alt="Featured image of post Kubernetes Basics" />&lt;h1 id="what-is-kubernetes">What is Kubernetes?
+&lt;/h1>&lt;p>&lt;strong>Kubernetes&lt;/strong> is an open-source platform designed to manage containerized applications at scale. It automates the deployment, scaling, and management of application containers across clusters of machines.&lt;/p>
+&lt;p>Kubernetes is capable of running thousands of replicas of an application simultaneously, ensuring high availability and reliability. Each replica (an instance of an application) can be accompanied by additional containers, such as &lt;strong>sidecars&lt;/strong>, which serve as &amp;ldquo;managers&amp;rdquo; performing essential tasks such as logging, proxying, or monitoring.&lt;/p>
+&lt;p>A key concept in Kubernetes is the shared lifecycle of containers within a pod, ensuring that all components of the application work together seamlessly. This design simplifies the deployment and management of applications, especially in large-scale environments where consistency and reliability are paramount.&lt;/p>
+&lt;hr>
+&lt;h2 id="fundamental-components">Fundamental Components
+&lt;/h2>&lt;h3 id="containers">Containers
+&lt;/h3>&lt;p>&lt;em>Packaging all dependencies, code, and runtime of exact versions&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Containers ensures smooth operation across both development and production environments.&lt;/li>
+&lt;li>Since modern applications require frequent updates and changes, containers make it easier for developers to implement and distribute updates without disrupting services.&lt;/li>
+&lt;li>&lt;strong>Dev teams&lt;/strong> can efficiently share and update applications, while &lt;strong>Ops teams&lt;/strong> can maintain scalable and reliable deployments.&lt;/li>
+&lt;/ul>
+&lt;h3 id="pod">Pod
+&lt;/h3>&lt;p>&lt;em>The smallest deployable unit in Kubernetes&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>A pod encapsulates one or more tightly coupled containers.&lt;/li>
+&lt;li>Typically a pot hosts a single main application container, but it can include additional containers (sidecars) that assist the main application.&lt;/li>
+&lt;li>Containers in a same pod share:
+&lt;ul>
+&lt;li>Storage volumes&lt;/li>
+&lt;li>Lifecycle management
+&lt;ul>
+&lt;li>All containers in a pod start/stop/restart altogether, ensuring they function as a cohesive unit.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Network resources (same IP address / port space)
+&lt;ul>
+&lt;li>They communicate internally via localhost hostname with their designated ports.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="replicaset">ReplicaSet
+&lt;/h3>&lt;p>&lt;em>Ensures desired pod availability and redundancy&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>A ReplicaSet is responsible for maintaining a stable set of identical pods, using a template.&lt;/li>
+&lt;li>Maintains the desired number of pods running at all time, automatically replacing failed pods.&lt;/li>
+&lt;li>&lt;strong>Purpose&lt;/strong>: High Availability, redundancy, and scalability.&lt;/li>
+&lt;/ul>
+&lt;h3 id="deployment">Deployment
+&lt;/h3>&lt;p>&lt;em>Manages ReplicaSets and facilitates rolling updates&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Deployment is a higher-level abstraction that manages ReplicaSets&lt;/li>
+&lt;li>Helps automate the scaling and rollout process while minimizing manual intervention.&lt;/li>
+&lt;/ul>
+&lt;h3 id="services">Services
+&lt;/h3>&lt;p>&lt;em>Configuration for network and load balancing&lt;/em>&lt;/p>
+&lt;ul>
+&lt;li>Kubernetes pods are ephemeral, they can be created / destroyed dynamically. This means their IP addresses are not assigned statically. Services provide a stable endpoint to resolve this issue for accessing pods.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Types of Services:&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>Cluster IP (default type)
+&lt;ul>
+&lt;li>Exposes the service internally within the cluster.&lt;/li>
+&lt;li>Allows communication between pods in the same cluster.&lt;/li>
+&lt;li>Assigns an internal IP address and DNS name, unreachable from the external.&lt;/li>
+&lt;li>Service detects the correct pod based on the given &lt;strong>selector name&lt;/strong>
+Service: &lt;code>spec.selector.app&lt;/code> = Pod: &lt;code>metadata.labels.app&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>NodePort
+&lt;ul>
+&lt;li>Exposes the service on a static port on each node&amp;rsquo;s IP.&lt;/li>
+&lt;li>Enabling the service accessible from outside the cluster using &lt;NodeIP>:&lt;NodePort>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>LoadBalancer
+&lt;ul>
+&lt;li>Exposes the service externally via a cloud-based load balancer.&lt;/li>
+&lt;li>Suitable for production environments requiring public access and traffic distribution.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="summary">Summary
+&lt;/h3>&lt;p>This post covered Kubernetes&amp;rsquo; core building units: Containers, Pods, ReplicaSets, Deployments, and Services. These components work together to provide a scalable, resilient system for managing containerized applications.&lt;/p></description></item><item><title>Docker Basics</title><link>https://rose-jang.github.io/roselogs/p/docker-basics/</link><pubDate>Wed, 26 Feb 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/docker-basics/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/docker-basics/docker-banner.png" alt="Featured image of post Docker Basics" />&lt;p>I journaled about the basics of Docker in this post. Starting with a brief overview of what docker is and concept of containerization. I delve into how containerization differs from traditional software deployment methods and conclude with a walkthrough of creating docker images and containers.&lt;/p>
+&lt;h1 id="what-is-docker">What is Docker?
+&lt;/h1>&lt;p>&lt;strong>&lt;code>Docker&lt;/code>&lt;/strong> is an open-source containerization platform (PaaS) that enables users to package applications along with their required dependencies into lightweight, portable containers. It simplifies application deployment and execution, making it a popular choice for modern software delivery.&lt;/p>
+&lt;hr>
+&lt;h2 id="why-docker">Why Docker?
+&lt;/h2>&lt;h3 id="benefits">Benefits
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Efficiency&lt;/strong>
+Docker streamlines the deployment process with &lt;strong>pre-built images, reducing the complexity&lt;/strong> of setting up environments from scratch. Containers save time and resources by eliminating the need for running a full operating system for each application.&lt;/li>
+&lt;li>&lt;strong>Portability&lt;/strong>
+Docker&amp;rsquo;s Platform-agnostic containers provide consistent performance across various environments. Known for the resolution of &amp;ldquo;It works on my machine&amp;rdquo;, &lt;strong>containers can run anywhere, not just on a local machine&lt;/strong>.&lt;/li>
+&lt;/ul>
+&lt;h3 id="virtualization-vs-containerization">Virtualization VS Containerization
+&lt;/h3>&lt;p>Virtualization is a technique that enables the execution of an entire operating system on a physical host using a &lt;strong>hypervisor&lt;/strong>, such as &lt;code>Hyper-V&lt;/code> or &lt;code>VMware&lt;/code>. This allows multiple virtual machines to &lt;strong>run independently on its own resources&lt;/strong> while being able to intercommunicate with each other.&lt;/p>
+&lt;p>Containerization on the other hand, focuses on packaging applications with their dependencies into containers that &lt;strong>share the resources of the host system&lt;/strong>. Containers are more lightweight than VMs because they &lt;strong>don&amp;rsquo;t require a full OS to run&lt;/strong>. Instead, they run in isolated environments on the host operating system.&lt;/p>
+&lt;h1 id="core-concepts">Core Concepts
+&lt;/h1>&lt;h2 id="behind-the-scenes-how-docker-operates">Behind-the-Scenes: How Docker Operates
+&lt;/h2>&lt;p>Docker&amp;rsquo;s powerful functionality stems from its core framework, &lt;strong>Docker Engine&lt;/strong> that enables containerization. The combination of docker components allows Docker to pull base images from repositories, create containers, and manage them seamlessly.&lt;/p>
+&lt;h3 id="docker-engine-components">Docker Engine Components
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Docker Host&lt;/strong>: Where the host system provides hardware resources to support operations.&lt;/li>
+&lt;li>&lt;strong>Docker Daemon&lt;/strong> (&lt;code>dockerd&lt;/code>): Primary component that listens and processes user requests, and also responsible for managing images and containers.&lt;/li>
+&lt;li>&lt;strong>Docker CLI&lt;/strong>: The interface users interact for communicating with the Docker system conveniently. CLI interprets user commands into API requests for Docker Daemon.&lt;/li>
+&lt;li>&lt;strong>REST API&lt;/strong>: A stateless API enabling communication between the CLI and Docker Daemon to process and fulfill user requests.&lt;/li>
+&lt;/ul>
+&lt;h3 id="a-little-more-about-rest-api">A little more about REST API&amp;hellip;
+&lt;/h3>&lt;ul>
+&lt;li>REST API is used for session communication between the user and the Docker Daemon. The Docker Daemon listens for REST API requests via &lt;code>docker.sock&lt;/code> or over HTTP(S)/TCP protocols. Since REST APIs are stateless, they do not retain information about previous requests; each request is independent. This stateless nature works because the user includes all necessary information in each request to ensure it can be fulfilled without relying on prior context.&lt;/li>
+&lt;/ul>
+&lt;h3 id="docker-engine-workflow">Docker Engine Workflow
+&lt;/h3>&lt;ol>
+&lt;li>User initiates Docker (run via CLI or program).&lt;/li>
+&lt;li>Docker Daemon (dockerd) functions and listens for REST API requests via local socket or remote TCP socket.&lt;/li>
+&lt;li>User sends requests via CLI, which interprets the commands and forwards them as REST API requests to the Docker Daemon.&lt;/li>
+&lt;li>Docker Daemon processes the request and performs the desired action (e.g., creating a container, displays running containers).&lt;/li>
+&lt;li>User can then interact with Docker resources and experience the Docker system.&lt;/li>
+&lt;/ol>
+&lt;h3 id="cross-platform-operation">Cross-Platform Operation
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Docker Desktop&lt;/strong>: Enables to run Linux based Docker system on Windows or macOS without additional emulation features.&lt;/li>
+&lt;li>&lt;strong>WSL Integration&lt;/strong>: Integrating Docker Desktop with the &lt;code>WSL (Windows Subsystem for Linux)&lt;/code> optimizes performances providing a native-like Linux environment for Windows users.&lt;/li>
+&lt;/ul>
+&lt;h2 id="try-dockerfile">Try Dockerfile
+&lt;/h2>&lt;ol>
+&lt;li>Start with &lt;strong>base images&lt;/strong> available online such as &lt;code>Docker Hub&lt;/code>&lt;/li>
+&lt;li>Create &lt;strong>custom images&lt;/strong> by writing a &lt;code>Dockerfile&lt;/code> script&lt;/li>
+&lt;li>The custom images are used to create &amp;amp; run containers&lt;/li>
+&lt;li>Containers operate in an isolated environment
+&lt;ul>
+&lt;li>Runs separately from the host system&lt;/li>
+&lt;li>Still relies on the host&amp;rsquo;s resources (CPU, memory, storage, &amp;hellip;)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="image">Image
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Image&lt;/strong> is a static template used to create a container, which is editable and usable multiple times.&lt;/li>
+&lt;li>Edit &lt;code>Dockerfike&lt;/code> if any updates needed for applications, very convenient &amp;amp; efficient way for development and deployment.&lt;/li>
+&lt;/ul>
+&lt;h3 id="container---port">Container - Port
+&lt;/h3>&lt;p>When running a container, you get to configure port numbers. There are 2 port numbers which are used on host and container respectively.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;code>-p host-port:container-port&lt;/code>&lt;/p>&lt;/blockquote>
+&lt;ul>
+&lt;li>&lt;code>host-port&lt;/code> is opened externally for incoming traffics.&lt;/li>
+&lt;li>&lt;code>container-port&lt;/code> is at the door of containers listening to connections.&lt;/li>
+&lt;li>Basically they map each other as you configured at container build.&lt;/li>
+&lt;/ul>
+&lt;h3 id="create-a-dockerfile">Create a Dockerfile
+&lt;/h3>&lt;ol>
+&lt;li>Specify and provide requirements in a &lt;code>Dockerfile&lt;/code>
+&lt;ul>
+&lt;li>Define a desired base image&lt;/li>
+&lt;li>Write required configurations, dependencies, or libraries&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> image:tag&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> apt-get update &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> apt-get install -y nginx&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">COPY&lt;/span> ./webServer&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> ./web.sh&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">CMD&lt;/span> ./conf.sh&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>Run the &lt;code>Dockerfile&lt;/code> to create a container
+&lt;code>docker -t image:tag directoryOfDockerfile&lt;/code>
+&lt;code>docker -t webApp:first .&lt;/code>
+-&amp;gt; then Docker installs the listed dependencies or packages&lt;/li>
+&lt;li>Run the container
+&lt;code>docker run -p 5000:443 --name myContainer webApp:first&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h3 id="dockerfile---best-practice">Dockerfile - Best practice
+&lt;/h3>&lt;ol>
+&lt;li>Minimize image size
+&lt;ul>
+&lt;li>Use base images with the minimalist &lt;code>alpine&lt;/code> Linux distribution&lt;/li>
+&lt;li>Install without cache using the flag &lt;code>--no-cache-dir&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Keep the script clean
+&lt;ul>
+&lt;li>List a required dependencies in a file (.txt)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> python:3.10-alpine&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">WORKDIR&lt;/span>&lt;span class="s"> /kube-WebApp&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">COPY&lt;/span> requirements.txt /kube-WebApp&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> pip install -r dependencies.txt --no-cache-dir&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">COPY&lt;/span> . /kube-WebApp&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">CMD&lt;/span> python app.py&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item><item><title>Host a Web Application on AWS</title><link>https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/</link><pubDate>Sun, 02 Feb 2025 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/</guid><description>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/cloud-banner.png" alt="Featured image of post Host a Web Application on AWS" />&lt;p>This project demonstrates how to deploy a web application on a Linux-based AWS EC2 instance. While there are several ways to publish a web application, it focuses on using &lt;code>User data&lt;/code> to automate the setup. By leveraging user data, we can streamline the configuration process, allowing the instance to perform initial setup tasks automatically during boot.&lt;/p>
+&lt;ul>
+&lt;li>&lt;em>Prerequisites&lt;/em>
+&lt;ol>
+&lt;li>AWS account (preferably &lt;strong>IAM admin user&lt;/strong>)&lt;/li>
+&lt;li>Simple HTML code for static website&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="create-aws-ec2-instance">Create AWS EC2 instance
+&lt;/h1>&lt;p>Since this project has modest resource requirements, I have selected a minimum-level instance. Despite its low resource allocation, this instance is more than capable of efficiently serving the web application. Default settings are applied during the instance initialization process.&lt;/p>
+&lt;h2 id="basic-components">Basic components
+&lt;/h2>&lt;ul>
+&lt;li>AMI: &lt;code>Amazon Linux&lt;/code> - maximize efficiency, minimize power resources&lt;/li>
+&lt;li>Type: &lt;code>t2.micro&lt;/code> - free tier, perfect for small project&lt;/li>
+&lt;li>Firewall (security group): Create with the default settings&lt;/li>
+&lt;/ul>
+&lt;p>Instance summary:
+&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary.png"
+width="941"
+height="508"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary_hu_62d67b9a1b71478a.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_summary_hu_5a41ae67c116b695.png 1024w"
+loading="lazy"
+alt="Instance summary"
+class="gallery-image"
+data-flex-grow="185"
+data-flex-basis="444px"
+>&lt;/p>
+&lt;h2 id="additional-configuration">Additional configuration
+&lt;/h2>&lt;h3 id="firewall-configure-a-security-group-for-public-access">Firewall: Configure a &lt;code>security group&lt;/code> for public access
+&lt;/h3>&lt;ul>
+&lt;li>Add an inbound rule to allow traffic from public users&lt;/li>
+&lt;li>Ensure the &lt;code>HTTP/HTTPS&lt;/code> protocols are enabled, as they are essential for initiating and maintaining web services &lt;em>(HTTP is used to support this non-production project)&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Inbound rule&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Type: &lt;strong>HTTP&lt;/strong> provides &lt;code>request-response&lt;/code> service on a web browser between &lt;code>client-server&lt;/code>&lt;/li>
+&lt;li>Protocol: &lt;strong>TCP&lt;/strong> ensures reliable data transmission&lt;/li>
+&lt;li>Port: &lt;strong>80&lt;/strong> port number designated for HTTP&lt;/li>
+&lt;li>Source: &lt;strong>0.0.0.0/0&lt;/strong> indicates &lt;code>any&lt;/code> IP addresses (all range)&lt;/li>
+&lt;/ul>
+&lt;h2 id="writing-a-user-data">Writing a User Data
+&lt;/h2>&lt;p>User data is a powerful feature in AWS allows to automate tasks during the initialization of an EC2 instance. By providing a shell script in the User Data field, we can:&lt;/p>
+&lt;ul>
+&lt;li>Automate repetitive setup tasks, reducing manual intervention.&lt;/li>
+&lt;li>Configure and prepare the instance during its boot process, saving time.&lt;/li>
+&lt;li>Ensure the instance is ready to serve its purpose immediately after launch.&lt;/li>
+&lt;/ul>
+&lt;p>Below is the shell script that automates the tasks required to run a web server. Insert the script as a file (&lt;code>.sh&lt;/code>) or as a text in the box.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;span class="lnt">45
+&lt;/span>&lt;span class="lnt">46
+&lt;/span>&lt;span class="lnt">47
+&lt;/span>&lt;span class="lnt">48
+&lt;/span>&lt;span class="lnt">49
+&lt;/span>&lt;span class="lnt">50
+&lt;/span>&lt;span class="lnt">51
+&lt;/span>&lt;span class="lnt">52
+&lt;/span>&lt;span class="lnt">53
+&lt;/span>&lt;span class="lnt">54
+&lt;/span>&lt;span class="lnt">55
+&lt;/span>&lt;span class="lnt">56
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 1. System Update &amp;amp; Installation&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Ensure the system is up to date and installs web server (Nginx).&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># After updates, start and enable the Nginx service.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">#!/bin/bash&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Escalate to admin user&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo su
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Update and install system package&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">yum update -y
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">yum install nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Start the web server&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl start nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl &lt;span class="nb">enable&lt;/span> nginx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Confirm the web service starts on boot&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">chkconfig nginx on
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 2. Retrieving AWS Metadata&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Retrieves AWS instance metadata for live demonstration.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Extract and save instance&amp;#39;s `availability zone` as a variable- AZ.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Retrieve metadata of the instance&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">TOKEN&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sb">`&lt;/span>curl -X PUT &lt;span class="s2">&amp;#34;http://169.254.169.254/latest/api/token&amp;#34;&lt;/span> -H &lt;span class="s2">&amp;#34;X-aws-ec2-metadata-token-ttl-seconds: 21600&amp;#34;&lt;/span>&lt;span class="sb">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">AZ&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sb">`&lt;/span>curl -H &lt;span class="s2">&amp;#34;X-aws-ec2-metadata-token: &lt;/span>&lt;span class="nv">$TOKEN&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> http://169.254.169.254/latest/meta-data/placement/availability-zone&lt;span class="sb">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Part 3. Create a Web Page File&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create an `index.html` file as a default landing page.&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create a web page file in .html&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">cat &amp;gt; /usr/share/nginx/html/index.html &lt;span class="s">&amp;lt;&amp;lt;EOF
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;!DOCTYPE html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;meta charset=&amp;#34;utf-8&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;title&amp;gt;WebApp | Rose&amp;lt;/title&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;style&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    body {
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      color: #f0f8ff;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      background-color: #809b4c;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">      font-family: Tahoma, Verdana, Arial, sans-serif;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    }
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;/style&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;div align=&amp;#34;center&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h1&amp;gt;NGINX Web App&amp;lt;/h1&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h2&amp;gt;This application was deployed from AWS EC2&amp;lt;/h2&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;h3&amp;gt;Instance Availability Zone: $AZ&amp;lt;/h3&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">    &amp;lt;p&amp;gt;Rose Jang&amp;lt;/p&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">  &amp;lt;/div&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&amp;lt;/html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">EOF&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h1 id="run-the-instance--web-server">Run the instance &amp;amp; Web server
+&lt;/h1>&lt;p>Using the user data script, we pre-configured everything necessary for the web server:&lt;/p>
+&lt;ul>
+&lt;li>Installed and configured the web server&lt;/li>
+&lt;li>Started and enabled the web server&lt;/li>
+&lt;li>Created and saved an &lt;code>index.html&lt;/code> file to server as the landing page&lt;/li>
+&lt;/ul>
+&lt;p>Now it&amp;rsquo;s time to test the web server by launching the instance and verifying that it is running successfully.&lt;/p>
+&lt;h2 id="launching-the-instance">Launching the Instance
+&lt;/h2>&lt;p>Double-check the instance settings and the shell script correctly saved in user data. Also ensure that the Security Group has an inbound rule allowing &lt;code>http&lt;/code> traffic (port 80) to enable public access to the web server.&lt;/p>
+&lt;h2 id="locate-the-instance-details">Locate the Instance Details
+&lt;/h2>&lt;p>Once the instance is running, navigate to the &lt;code>Details&lt;/code> section to check its status and availability zone. This will be used to verify if the metadata is correctly passed in the script. Locate the &lt;strong>public IP address&lt;/strong> to access the web server. Ensure the instance is in a &amp;ldquo;Running&amp;rdquo; state and that all health checks have passed before proceeding.&lt;/p>
+&lt;p>Instance details&lt;/p>
+&lt;ul>
+&lt;li>ID: ending with &lt;strong>d7d7&lt;/strong>&lt;/li>
+&lt;li>Availability Zone: &lt;strong>us-east-1c&lt;/strong>&lt;/li>
+&lt;li>Public IP address: &lt;strong>54.91.44.217&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ.png"
+width="2132"
+height="127"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ_hu_9e2e8ba06f2f8ef4.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_AZ_hu_5464b925342e17a9.png 1024w"
+loading="lazy"
+alt="Instance Available Zone"
+class="gallery-image"
+data-flex-grow="1678"
+data-flex-basis="4028px"
+>&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP.png"
+width="2178"
+height="490"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP_hu_20bf36a29b8d7b44.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/instance_IP_hu_4d3fc96479fade45.png 1024w"
+loading="lazy"
+alt="Instance IP address"
+class="gallery-image"
+data-flex-grow="444"
+data-flex-basis="1066px"
+>&lt;/p>
+&lt;h2 id="test-the-web-server">Test the Web Server
+&lt;/h2>&lt;p>Access the public IP address in a web browser using &lt;code>http&lt;/code> protocol.
+&lt;code>(ex. http://54.91.44.217)&lt;/code>
+Confirm that the Nginx web server is running and the landing page matches the content of the &lt;code>index.html&lt;/code> file.&lt;/p>
+&lt;p>&lt;img src="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp.png"
+width="1820"
+height="520"
+srcset="https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp_hu_b29ec2954f3f2a07.png 480w, https://rose-jang.github.io/roselogs/p/host-a-web-application-on-aws/webapp_hu_b7fc48d94d2a68ae.png 1024w"
+loading="lazy"
+alt="Web app result"
+class="gallery-image"
+data-flex-grow="350"
+data-flex-basis="840px"
+>&lt;/p>
+&lt;h3 id="tip">&lt;em>TIP!&lt;/em>
+&lt;/h3>&lt;p>If the web server is not running or there are any issues, check the log file for details.
+The log file provides detailed information about the execution of the user data script and helps troubleshoot any errors or misconfigurations.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">cat&lt;/span> &lt;span class="o">/&lt;/span>&lt;span class="k">var&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="nb">log&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">cloud&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">init&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">output&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">log&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h1 id="conclusion">Conclusion
+&lt;/h1>&lt;p>This project successfully demonstrated how to deploy a web application on an AWS EC2 instance using Nginx. Utilizing &lt;code>User data&lt;/code> reduces time on initializing core configurations including web server installation, setup, and deployment of a static landing page. This streamlined approach highlights the efficiency and flexibility of cloud infrastructure for hosting a web application.&lt;/p></description></item><item><title>Archives</title><link>https://rose-jang.github.io/roselogs/archives/</link><pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/archives/</guid><description/></item><item><title>Search</title><link>https://rose-jang.github.io/roselogs/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://rose-jang.github.io/roselogs/search/</guid><description/></item></channel></rss>
