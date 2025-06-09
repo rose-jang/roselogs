@@ -86,50 +86,50 @@ All virtual machines in this lab are connected using a **Host-only network adapt
         `sudo apt-get install snort -y`
         
     2. Define the network range to monitor during installation (e.g., 192.168.56.0/24)
+
+![image.png](snort-installation.png)
         
-        ![image.png](snort-installation.png)
-        
-    3. Test Snort:
+    4. Test Snort:
         
         `sudo snort -v`
         
-        ![image.png](snort-test.png)
+![image.png](snort-test.png)
         
 
 - **Configuration**
-    - Snort file path
-        - Configs: **/etc/snort**
-        - Logs: **/var/log/snort**
-        - Rules: **/etc/snort/rules**
-    1. Rule configuration
-        - Add ruled into the file > `/etc/snort/rules/local.rules`
-        - Alert rule configuration structure
-            - Header - Body - Actions
-            - alert [protocol] [source] [port]  → [destination] [port] (body… msg:”~~detected”;)
-            
-            ```bash
-            # Detect open port scanning
-            alert tcp any any -> $HOME_NET 1:1024 (
-            	flags: S;
-            	msg: "PORT SCAN detected";
-            	threshold: type both, track by_src, count 10, seconds 3;
-            	sid: 1001; rev: 1;
-            )
-            
-            # Detect Mimikatz
-            alert tcp any any -> $HOME_NET any (
-            	msg: "Mimikatz detected";
-            	content: "mimikatz"; nocase;
-            	sed: 1002; rev: 1;
-            )
-            ```
-            
-            - Detect open port scanning
-                - `flags: S;` # Flags for TCP **SYN**
-                - `threshold:` # Triggers when 10 SYN packets in 3 seconds
-            - Detect Mimikatz
-                - `content:` # Detects a string “mimikatz”, case insensitive
-    
+  - **Snort file path**
+    - Configs: **/etc/snort**
+    - Logs: **/var/log/snort**
+    - Rules: **/etc/snort/rules**
+  1. Rule configuration
+      - Add ruled into the file > `/etc/snort/rules/local.rules`
+      - Alert rule configuration structure
+          - Header - Body - Actions
+          - alert [protocol] [source] [port]  → [destination] [port] (body… msg:”~~detected”;)
+          
+      ```bash
+      # Detect open port scanning
+      alert tcp any any -> $HOME_NET 1:1024 (
+        flags: S;
+        msg: "PORT SCAN detected";
+        threshold: type both, track by_src, count 10, seconds 3;
+        sid: 1001; rev: 1;
+      )
+      
+      # Detect Mimikatz
+      alert tcp any any -> $HOME_NET any (
+        msg: "Mimikatz detected";
+        content: "mimikatz"; nocase;
+        sed: 1002; rev: 1;
+      )
+      ```
+      
+      - Detect open port scanning
+          - `flags: S;` # Flags for TCP **SYN**
+          - `threshold:` # Triggers when 10 SYN packets in 3 seconds
+      - Detect Mimikatz
+          - `content:` # Detects a string “mimikatz”, case insensitive
+  
 
 ---
 
@@ -150,14 +150,13 @@ All virtual machines in this lab are connected using a **Host-only network adapt
 - **Installation**
     1. Install by using command retrieved from Wazuh dashboard
     2. Or insert authentication key from Agent management
-        
-        > Refer to the [**Agent deployment**](https://www.notion.so/Home-Lab-SOC-Project-Setting-UP-2017754e3fa080a38c38d53645bd9bf0?pvs=21) in **SIEM: Wazuh** section above
-        > 
-        
-        ![image.png](wazuh-agent.png)
+      > Refer to the [**Agent deployment**](https://www.notion.so/Home-Lab-SOC-Project-Setting-UP-2017754e3fa080a38c38d53645bd9bf0?pvs=21) in **SIEM: Wazuh** section above
+
+![image.png](wazuh-agent.png)
   
     3. Confirm logs and events appearing on the Wazuh dashboard
-        ![image.png](wazuh-dashboard.png)
+
+![image.png](wazuh-dashboard.png)
 
 
 # Conclusion
