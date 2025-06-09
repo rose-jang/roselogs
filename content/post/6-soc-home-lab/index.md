@@ -28,7 +28,7 @@ The SOC home lab consists of **three virtual machines** running on **VirtualBox*
 
 > This setup assumes that the attacker already has gained access to the internal network. This reflects post-compromise behaviour for realistic threat emulation.
 
-![Alt text](diagram.png)
+![](diagram.png)
 
 ---
 
@@ -38,10 +38,10 @@ The SOC home lab consists of **three virtual machines** running on **VirtualBox*
 
 All virtual machines in this lab are connected using a **Host-only network adapter** to ensure isolation from the internet, allowing safe and controlled testing. Each machine is configured with a **static IP address** to simplify traffic analysis and eliminate ambiguity during monitoring.
 
-- **Static IP assignments**:
-    - Ubuntu (SOC Server): `192.168.56.10`
-    - Windows (Victim): `192.168.56.20`
-    - Kali (Attacker): `192.168.56.30`
+**Static IP assignments**:
+  - Ubuntu (SOC Server): `192.168.56.10`
+  - Windows (Victim): `192.168.56.20`
+  - Kali (Attacker): `192.168.56.30`
 
 ---
 
@@ -51,28 +51,26 @@ All virtual machines in this lab are connected using a **Host-only network adapt
 
 ### SIEM: Wazuh
 
-- **Installation**
-    1. Install **Wazuh** **All-in-One** package (from [**Wazuh Quickstart**](https://documentation.wazuh.com/current/quickstart.html)), which includes:
-        - Wazuh Manager
-        - Filebeat
-        - Elasticsearch
-        - Kibana
-    2. Verify server dashboard access:
-        - Server IP: 192.168.56.10, Port 5601
-        - URL: `http://[serverIP]:5601`
+**Installation**
+  1. Install **Wazuh** **All-in-One** package (from [**Wazuh Quickstart**](https://documentation.wazuh.com/current/quickstart.html)), which includes:
+      - Wazuh Manager
+      - Filebeat
+      - Elasticsearch
+      - Kibana
+  2. Verify server dashboard access:
+      - Server IP: 192.168.56.10, Port 5601
+      - URL: `http://[serverIP]:5601`
 
-- **Agent Deployment**
-    1. Add an agent from Wazuh dashboard
-    2. Troubleshooting for agent deployment on dashboard
-        a. Run the agent manager in CLI:
-            
-             `sudo /var/ossec/bin/manage_agents` 
-            
-        b. Follow prompts to create an agent
-        c. Extract the authentication key of the agent
-        d. Enter the key into the Wazuh Agent software on Windows machine
-        e. Restart both the agent and server
-    3. Confirm the Windows machine appears in the dashboard
+**Agent Deployment**
+  1. Add an agent from Wazuh dashboard
+  2. Troubleshooting for agent deployment on dashboard
+      a. Run the agent manager in CLI:
+           `sudo /var/ossec/bin/manage_agents`
+      b. Follow prompts to create an agent
+      c. Extract the authentication key of the agent
+      d. Enter the key into the Wazuh Agent software on Windows machine
+      e. Restart both the agent and server
+  3. Confirm the Windows machine appears in the dashboard
 
 ### IDS/IPD: Snort
 
@@ -80,53 +78,52 @@ All virtual machines in this lab are connected using a **Host-only network adapt
 - IDS (Intrusion Detection System) alerts on suspicious activities based on defined rules.
 - IPS (Intrusion Prevention System) acts a step further by actively responding to malicious traffics.
 
-- **Installation**
-    1. Install in CLI:
-        `sudo apt-get install snort -y`
-    2. Define the network range to monitor during installation (e.g., 192.168.56.0/24)
+**Installation**
+  1. Install in CLI:
+      `sudo apt-get install snort -y`
+  2. Define the network range to monitor during installation (e.g., 192.168.56.0/24)
 
-![Alt text](snort-installation.png)
-        
-    3. Test Snort:
-        `sudo snort -v`
-        
-![Alt text](snort-test.png)
-        
+![](snort-installation.png)
 
-- **Configuration**
-  - **Snort file path**
-    - Configs: **/etc/snort**
-    - Logs: **/var/log/snort**
-    - Rules: **/etc/snort/rules**
-  1. Rule configuration
-      - Add rules into the file > `/etc/snort/rules/local.rules`
-      - Alert rule configuration structure:
-          - Header - Body - Actions
-          - alert [protocol] [source] [port]  → [destination] [port] (body… msg:”~~detected”;)
-          
-      ```bash
-      # Detect open port scanning
-      alert tcp any any -> $HOME_NET 1:1024 (
-        flags: S;
-        msg: "PORT SCAN detected";
-        threshold: type both, track by_src, count 10, seconds 3;
-        sid: 1001; rev: 1;
-      )
+  3. Test Snort:
+      `sudo snort -v`
       
-      # Detect Mimikatz
-      alert tcp any any -> $HOME_NET any (
-        msg: "Mimikatz detected";
-        content: "mimikatz"; nocase;
-        sed: 1002; rev: 1;
-      )
-      ```
-      
-      - Detect open port scanning
-          - `flags: S;` # Flags for TCP **SYN**
-          - `threshold:` # Triggers when 10 SYN packets in 3 seconds
-      - Detect Mimikatz
-          - `content:` # Detects a string “mimikatz”, case insensitive
-  
+![](snort-test.png)
+        
+**Configuration**
+- **Snort file path**
+  - Configs: **/etc/snort**
+  - Logs: **/var/log/snort**
+  - Rules: **/etc/snort/rules**
+1. Rule configuration
+  - Add rules into the file > `/etc/snort/rules/local.rules`
+  - Alert rule configuration structure:
+      - Header - Body - Actions
+      - alert [protocol] [source] [port]  → [destination] [port] (body… msg:”~~detected”;)
+    
+```bash
+# Detect open port scanning
+alert tcp any any -> $HOME_NET 1:1024 (
+  flags: S;
+  msg: "PORT SCAN detected";
+  threshold: type both, track by_src, count 10, seconds 3;
+  sid: 1001; rev: 1;
+)
+
+# Detect Mimikatz
+alert tcp any any -> $HOME_NET any (
+  msg: "Mimikatz detected";
+  content: "mimikatz"; nocase;
+  sed: 1002; rev: 1;
+)
+```
+
+- Detect open port scanning
+    - `flags: S;` # Flags for TCP **SYN**
+    - `threshold:` # Triggers when 10 SYN packets in 3 seconds
+- Detect Mimikatz
+    - `content:` # Detects a string “mimikatz”, case insensitive
+
 
 ---
 
@@ -134,25 +131,21 @@ All virtual machines in this lab are connected using a **Host-only network adapt
 
 ### Sysmon: Activity logging
 
-- **Installation**
-    1. Download Sysmon file on [Microsoft official site](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
-    2. Use the configuration file [provided by Wazuh](https://wazuh.com/resources/blog/emulation-of-attack-techniques-and-detection-with-wazuh/sysmonconfig.xml) (save as XML file)
-    3. Install via PowerShell:
-        `./sysmon64.exe -i sysconfig.xml`
+**Installation**
+  1. Download Sysmon file on [Microsoft official site](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
+  2. Use the configuration file [provided by Wazuh](https://wazuh.com/resources/blog/emulation-of-attack-techniques-and-detection-with-wazuh/sysmonconfig.xml) (save as XML file)
+  3. Install via PowerShell:
+      `./sysmon64.exe -i sysconfig.xml`
         
 ### Wazuh Agent
 
-- **Installation**
-    1. Install by using command retrieved from Wazuh dashboard
-    2. Or insert authentication key from Agent management
-      > Refer to the **Agent deployment** in **SIEM: Wazuh** section above
-       
-![Alt text](wazuh-agent.png)
-    
-    3. Confirm logs and events appearing on the Wazuh dashboard
-
-![Alt text](wazuh-dashboard.png)
-
+**Installation**
+  1. Install by using command retrieved from Wazuh dashboard
+  2. Or insert authentication key from Agent management
+    > Refer to the **Agent deployment** in **SIEM: Wazuh** section above
+![](wazuh-agent.png)
+  3. Confirm logs and events appearing on the Wazuh dashboard
+![](wazuh-dashboard.png)
 
 # Conclusion
 
