@@ -1,5 +1,5 @@
 ---
-title: SOC Home Lab: Setting Up
+title: SOC Environment Home Lab--Setting Up
 date: 2025-06-08
 draft: false
 disqus: false
